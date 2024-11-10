@@ -32,5 +32,10 @@ func (app *application) routes() http.Handler {
 	//router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 	//
 	//return app.recoverPanic(app.rateLimit(app.authenticate(router)))
+	router.HandlerFunc(http.MethodPost, "/envs", app.createEnvironmentHandler)
+	router.HandlerFunc(http.MethodGet, "/envs/:id", app.showEnvironmentHandler)
+	router.HandlerFunc(http.MethodGet, "/envs", app.listEnvironmentHandler)
+	router.HandlerFunc(http.MethodPatch, "/envs/:id", app.updateEnvironmentHandler)
+	router.HandlerFunc(http.MethodDelete, "/envs/:id", app.deleteEnvironmentHandler)
 	return router
 }

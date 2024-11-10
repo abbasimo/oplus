@@ -4,14 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"github.com/abbasimo/oplus/internal/data"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"os"
 	"sync"
 	"time"
 )
-
-const version = "1.0.0"
 
 type config struct {
 	port int
@@ -27,6 +26,7 @@ type config struct {
 type application struct {
 	config config
 	logger zerolog.Logger
+	models data.Models
 	wg     sync.WaitGroup
 }
 
@@ -49,12 +49,18 @@ func main() {
 	if err != nil {
 		logger.Fatal().Err(err).Msg("can not connect to database")
 	}
-	defer db.Close()
+	defer func() {
+		err = db.Close()
+		if err != nil {
+			logger.Fatal().Err(err).Msg("can not close database")
+		}
+	}()
 	logger.Info().Msg("database connection pool established")
 
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 
 	err = app.serve()
