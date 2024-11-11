@@ -46,7 +46,6 @@ func (app *application) createEnvironmentHandler(w http.ResponseWriter, r *http.
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-
 }
 
 func (app *application) showEnvironmentHandler(w http.ResponseWriter, r *http.Request) {
@@ -127,7 +126,6 @@ func (app *application) updateEnvironmentHandler(w http.ResponseWriter, r *http.
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-
 }
 
 func (app *application) deleteEnvironmentHandler(w http.ResponseWriter, r *http.Request) {

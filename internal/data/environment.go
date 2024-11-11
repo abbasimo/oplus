@@ -10,12 +10,12 @@ import (
 )
 
 type Environment struct {
-	ID          int64      `json:"id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	CreatedAt   time.Time  `json:"-"`
-	Version     int        `json:"version"`
-	LastOutage  *time.Time `json:"last_outage"` // todo: i think its better to have default value
+	ID          int64     `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"-"`
+	Version     int       `json:"-"`
+	Services    []Service `json:"services"`
 }
 
 func ValidateEnvironment(v *validator.Validator, env *Environment) {
@@ -28,12 +28,6 @@ func ValidateEnvironment(v *validator.Validator, env *Environment) {
 type EnvironmentModel struct {
 	DB *sql.DB
 }
-
-var (
-	ErrDuplicateTitle = errors.New("duplicate title")
-	ErrRecordNotFound = errors.New("record not found")
-	ErrEditConflict   = errors.New("edit conflict")
-)
 
 func (e EnvironmentModel) Insert(env *Environment) error {
 	query := `  INSERT INTO environment (title, description)
@@ -60,7 +54,7 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 	if id < 1 {
 		return nil, ErrRecordNotFound
 	}
-	query := `	SELECT id, created_at, title, description, last_outage, version
+	query := `	SELECT id, created_at, title, description, version
 				FROM environment
 				WHERE id = $1`
 
@@ -73,7 +67,6 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 		&env.CreatedAt,
 		&env.Title,
 		&env.Description,
-		&env.LastOutage,
 		&env.Version,
 	)
 
@@ -144,7 +137,7 @@ func (e EnvironmentModel) Delete(id int64) error {
 }
 
 func (e EnvironmentModel) GetAll(title string, description string, filters Filters) ([]*Environment, Metadata, error) {
-	query := fmt.Sprintf(`SELECT count(*) OVER(), id, created_at, title, description, last_outage, version
+	query := fmt.Sprintf(`SELECT count(*) OVER(), id, created_at, title, description, version
 								FROM environment
 								WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 								AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $2) OR $2 = '')
@@ -172,7 +165,6 @@ func (e EnvironmentModel) GetAll(title string, description string, filters Filte
 			&env.CreatedAt,
 			&env.Title,
 			&env.Description,
-			&env.LastOutage,
 			&env.Version,
 		)
 		if err != nil {
