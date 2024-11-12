@@ -54,15 +54,19 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 	if id < 1 {
 		return nil, ErrRecordNotFound
 	}
-	query := `	SELECT id, created_at, title, description, version
+	envQuery := `SELECT id, created_at, title, description, version
 				FROM environment
 				WHERE id = $1`
+
+	svcQuery := `SELECT id, created_at, title, description, version, interval, health_check_url
+				FROM service
+				WHERE environment_id = $1`
 
 	var env Environment
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := e.DB.QueryRowContext(ctx, query, id).Scan(
+	err := e.DB.QueryRowContext(ctx, envQuery, id).Scan(
 		&env.ID,
 		&env.CreatedAt,
 		&env.Title,
@@ -78,6 +82,27 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 			return nil, err
 		}
 	}
+
+	svcRows, er := e.DB.QueryContext(ctx, svcQuery, id)
+	if er != nil {
+		return &env, nil
+	}
+	defer svcRows.Close()
+
+	for svcRows.Next() {
+		var svc Service
+		svcRows.Scan(
+			&svc.ID,
+			&svc.CreatedAt,
+			&svc.Title,
+			&svc.Description,
+			&svc.Version,
+			&svc.Interval,
+			&svc.HealthCheckUrl,
+		)
+		env.Services = append(env.Services, svc)
+	}
+
 	return &env, nil
 }
 
@@ -168,7 +193,7 @@ func (e EnvironmentModel) GetAll(title string, description string, filters Filte
 			&env.Version,
 		)
 		if err != nil {
-			return nil, Metadata{}, err // Update this to return an empty Metadata struct.
+			return nil, Metadata{}, err
 		}
 		envs = append(envs, &env)
 	}

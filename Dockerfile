@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+EXPOSE 4000
 
 FROM golang:1.23
 
@@ -8,8 +9,8 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY *.go ./
+COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /oplus
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o /oplus ./cmd/api/
 
 CMD ["/oplus"]

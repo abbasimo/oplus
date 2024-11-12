@@ -9,16 +9,24 @@ import (
 )
 
 type Service struct {
-	ID             int64     `json:"id"`
-	EnvironmentID  int64     `json:"environment_id"`
-	Title          string    `json:"title"`
-	Description    string    `json:"description"`
-	Uptime         int64     `json:"uptime"`
-	HealthCheckUrl string    `json:"health_check_url"`
-	Interval       int64     `json:"interval"`
-	CreatedAt      time.Time `json:"-"`
-	Version        int       `json:"-"`
+	ID             int64         `json:"id"`
+	EnvironmentID  int64         `json:"environment_id"`
+	Title          string        `json:"title"`
+	Description    string        `json:"description"`
+	Uptime         int64         `json:"uptime"`
+	HealthCheckUrl string        `json:"health_check_url"`
+	Interval       int64         `json:"interval"`
+	CreatedAt      time.Time     `json:"-"`
+	Version        int           `json:"-"`
+	Status         ServiceStatus `json:"status"`
 }
+
+type ServiceStatus string
+
+const (
+	Healthy   ServiceStatus = "healthy"
+	Unhealthy ServiceStatus = "unhealthy"
+)
 
 type ServiceModel struct {
 	DB *sql.DB
@@ -62,7 +70,7 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*Service, error) {
 		return nil, ErrRecordNotFound
 	}
 
-	query := `	SELECT id, created_at, title, description, version, environment_id, health_check_url, interval
+	query := `	SELECT id, created_at, title, description, version, environment_id, interval, health_check_url
 				FROM service
 				WHERE id = $1 and environment_id = $2`
 
@@ -77,8 +85,8 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*Service, error) {
 		&svc.Description,
 		&svc.Version,
 		&svc.EnvironmentID,
-		&svc.HealthCheckUrl,
 		&svc.Interval,
+		&svc.HealthCheckUrl,
 	)
 
 	if err != nil {
@@ -92,7 +100,7 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*Service, error) {
 	return &svc, nil
 }
 
-func (e ServiceModel) Update(svc *Service) error {
+func (s ServiceModel) Update(svc *Service) error {
 	query := `  UPDATE service
 				SET title = $1, description = $2, health_check_url = $3, interval = $4, version = version + 1
 				WHERE id = $5 AND version = $6
@@ -110,7 +118,7 @@ func (e ServiceModel) Update(svc *Service) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := e.DB.QueryRowContext(ctx, query, args...).Scan(&svc.Version)
+	err := s.DB.QueryRowContext(ctx, query, args...).Scan(&svc.Version)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -119,5 +127,32 @@ func (e ServiceModel) Update(svc *Service) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (s ServiceModel) Delete(envID int64, svcID int64) error {
+	if envID < 1 || svcID < 1 {
+		return ErrRecordNotFound
+	}
+
+	query := `DELETE FROM service WHERE environment_id = $1 and id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := s.DB.ExecContext(ctx, query, envID, svcID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
 	return nil
 }
