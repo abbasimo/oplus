@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS environment (
         created_at timestamp(0) with time zone NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS service (
+CREATE TABLE IF NOT EXISTS service ( -- TODO: is not better to use plural of noun?
       id bigserial PRIMARY KEY,
       environment_id bigint NOT NULL REFERENCES environment ON DELETE CASCADE ,
       title varchar(250) NOT NULL,
