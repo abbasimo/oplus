@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"flag"
 	"github.com/abbasimo/oplus/internal/data"
+	"github.com/abbasimo/oplus/internal/healthcheck"
+	"github.com/go-co-op/gocron/v2"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"os"
@@ -43,11 +45,10 @@ func main() {
 	logger := zerolog.New(os.Stdout).With().
 		Timestamp().
 		Logger()
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("can not connect to database")
+		logger.Fatal().Stack().Err(err).Msg("can not connect to database")
 	}
 	defer func() {
 		err = db.Close()
@@ -62,6 +63,17 @@ func main() {
 		logger: logger,
 		models: data.NewModels(db),
 	}
+
+	// make a function that initialize scheduler
+	// in that function must fetch any service from database
+	// then register any service as a job with specific interval
+	// think about how add job in runtime
+	// maybe it's better to add following scheduler in application struct till accessible from handler
+	s, _ := gocron.NewScheduler()
+
+	s.NewJob(gocron.DurationJob(3*time.Second), gocron.NewTask(func() { healthcheck.CheckServiceHealth("") }))
+
+	s.Start()
 
 	err = app.serve()
 	if err != nil {

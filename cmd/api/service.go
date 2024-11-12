@@ -159,3 +159,33 @@ func (app *application) deleteServiceHandler(w http.ResponseWriter, r *http.Requ
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) showServiceHandler(w http.ResponseWriter, r *http.Request) {
+	envID, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	svcID, err := app.readServiceIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	svc, err := app.models.Service.Get(envID, svcID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"service": svc}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
