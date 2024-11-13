@@ -15,7 +15,7 @@ type Service struct {
 	Description    string        `json:"description"`
 	Uptime         int64         `json:"uptime"`
 	HealthCheckUrl string        `json:"health_check_url"`
-	Interval       int64         `json:"interval"`
+	Interval       int64         `json:"interval"` // todo: why this value is int64?! int is enough
 	CreatedAt      time.Time     `json:"-"`
 	Version        int           `json:"-"`
 	Status         ServiceStatus `json:"status"`
@@ -41,7 +41,7 @@ func ValidateService(v *validator.Validator, svc *Service) {
 	v.Check(svc.HealthCheckUrl != "", "health_check_url", "must be provided")
 	//v.Check(validator.Matches(svc.HealthCheckUrl, validator.UrlRX), "health_check_url", "url is incorrect") // todo: must to check url correctness!
 
-	v.Check(svc.Interval > 0, "interval", "must be bigger than 0")
+	v.Check(svc.Interval > 4, "interval", "must be bigger than 4")
 }
 
 func (s ServiceModel) Insert(svc *Service) error {

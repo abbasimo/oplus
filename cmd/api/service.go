@@ -4,7 +4,9 @@ import (
 	"errors"
 	"github.com/abbasimo/oplus/internal/data"
 	"github.com/abbasimo/oplus/internal/validator"
+	"github.com/go-co-op/gocron/v2"
 	"net/http"
+	"time"
 )
 
 func (app *application) createServiceHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +53,19 @@ func (app *application) createServiceHandler(w http.ResponseWriter, r *http.Requ
 			app.serverErrorResponse(w, r, err)
 		}
 		return
+	}
+	//TODO: change duration to interval
+	_, err = app.scheduler.NewJob(gocron.DurationJob(time.Duration(svc.Interval)*time.Second), gocron.NewTask(func() {
+		data.CheckServiceHealth(app.models.Service.DB,
+			data.Service{
+				ID:             svc.ID,
+				HealthCheckUrl: svc.HealthCheckUrl,
+			},
+		)
+	}))
+
+	if err != nil {
+		app.logger.Error().Err(err).Msg("error creating job")
 	}
 
 	err = app.writeJSON(w, http.StatusCreated, envelope{"service": svc}, nil)

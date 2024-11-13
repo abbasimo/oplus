@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS healthcheck (
        version integer NOT NULL DEFAULT 1
 );
 
+ -- TODO: handle concurrency for update record with version
 CREATE OR REPLACE FUNCTION update_healthcheck(
     p_service_id BIGINT,
     p_status TEXT

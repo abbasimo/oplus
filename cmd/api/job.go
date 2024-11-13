@@ -15,9 +15,9 @@ func (app *application) initializeJobScheduler(db *sql.DB) {
 	}
 	// submit all service as task (job) with its interval
 	for _, svc := range *services {
-		// use interval
-		_, err = app.scheduler.NewJob(gocron.DurationJob(10*time.Second), gocron.NewTask(func() {
-			data.CheckServiceHealth(db,
+		// todo: can i add this job with some interval between them?!
+		_, err = app.scheduler.NewJob(gocron.DurationJob(time.Duration(svc.Interval)*time.Second), gocron.NewTask(func() {
+			data.CheckServiceHealth(app.models.Service.DB,
 				data.Service{
 					ID:             svc.ID,
 					HealthCheckUrl: svc.HealthCheckUrl,
