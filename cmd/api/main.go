@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"flag"
 	"github.com/abbasimo/oplus/internal/data"
-	"github.com/abbasimo/oplus/internal/healthcheck"
 	"github.com/go-co-op/gocron/v2"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
@@ -26,10 +25,11 @@ type config struct {
 }
 
 type application struct {
-	config config
-	logger zerolog.Logger
-	models data.Models
-	wg     sync.WaitGroup
+	config    config
+	logger    zerolog.Logger
+	models    data.Models
+	wg        sync.WaitGroup
+	scheduler gocron.Scheduler
 }
 
 func main() {
@@ -58,10 +58,13 @@ func main() {
 	}()
 	logger.Info().Msg("database connection pool established")
 
+	s, _ := gocron.NewScheduler()
+
 	app := &application{
-		config: cfg,
-		logger: logger,
-		models: data.NewModels(db),
+		config:    cfg,
+		logger:    logger,
+		models:    data.NewModels(db),
+		scheduler: s,
 	}
 
 	// make a function that initialize scheduler
@@ -69,11 +72,7 @@ func main() {
 	// then register any service as a job with specific interval
 	// think about how add job in runtime
 	// maybe it's better to add following scheduler in application struct till accessible from handler
-	s, _ := gocron.NewScheduler()
-
-	s.NewJob(gocron.DurationJob(3*time.Second), gocron.NewTask(func() { healthcheck.CheckServiceHealth("") }))
-
-	s.Start()
+	app.initializeJobScheduler(db)
 
 	err = app.serve()
 	if err != nil {

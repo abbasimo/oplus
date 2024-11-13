@@ -156,3 +156,42 @@ func (s ServiceModel) Delete(envID int64, svcID int64) error {
 
 	return nil
 }
+
+func (s ServiceModel) GetAll() (*[]Service, error) {
+
+	query := `	SELECT id, created_at, title, description, version, environment_id, interval, health_check_url
+				FROM service
+				`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var services []Service
+
+	rows, err := s.DB.QueryContext(ctx, query)
+
+	for rows.Next() {
+		var svc Service
+		err = rows.Scan(
+			&svc.ID,
+			&svc.CreatedAt,
+			&svc.Title,
+			&svc.Description,
+			&svc.Version,
+			&svc.EnvironmentID,
+			&svc.Interval,
+			&svc.HealthCheckUrl,
+		)
+		services = append(services, svc)
+	}
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &services, nil
+}
