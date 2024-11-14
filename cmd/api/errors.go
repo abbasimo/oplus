@@ -30,7 +30,6 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 // Write the response using the writeJSON() helper. If this happens to return an
 // error then log it, and fall back to sending the client an empty response with a
 // 500 Internal Server Error status code.
-
 // The serverErrorResponse() method will be used when our application encounters an
 // unexpected problem at runtime. It logs the detailed error message, then uses the
 // errorResponse() helper to send a 500 Internal Server Error status code and JSON
@@ -90,6 +89,7 @@ func (app *application) authenticationRequiredResponse(w http.ResponseWriter, r 
 	message := "you must be authenticated to access this resource"
 	app.errorResponse(w, r, http.StatusUnauthorized, message)
 }
+
 func (app *application) inactiveAccountResponse(w http.ResponseWriter, r *http.Request) {
 	message := "your user account must be activated to access this resource"
 	app.errorResponse(w, r, http.StatusForbidden, message)

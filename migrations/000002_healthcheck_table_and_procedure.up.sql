@@ -29,12 +29,12 @@ BEGIN
     IF last_record IS NULL THEN
         INSERT INTO healthcheck (service_id, start_time, status)
         VALUES (p_service_id, NOW(), p_status);
-        result_text := 'Inserted new record';
+        result_text := 'inserted';
     ELSE
         -- Step 3: Check if the status of the last record matches the provided status
         IF last_record.status = p_status THEN
             -- Step 4: If status matches, do nothing
-            result_text := 'No action taken';
+            result_text := 'no-action';
 
         ELSE
             -- Step 5: If status does not match, update end_time of the last record and insert a new record
@@ -44,7 +44,7 @@ BEGIN
 
             INSERT INTO healthcheck (service_id, start_time, status)
             VALUES (p_service_id, NOW(), p_status);
-            result_text := 'Updated end_time of last record and inserted new record';
+            result_text := 'changed';
         END IF;
     END IF;
     RETURN result_text;

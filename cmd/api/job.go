@@ -20,6 +20,14 @@ func (app *application) initializeJobScheduler() {
 				data.Service{
 					ID:             svc.ID,
 					HealthCheckUrl: svc.HealthCheckUrl,
+					Title:          svc.Title,
+					Description:    svc.Description,
+					CreatedAt:      svc.CreatedAt,
+					Interval:       svc.Interval,
+					EnvironmentID:  svc.EnvironmentID,
+					Status:         svc.Status,
+					Uptime:         svc.Uptime,
+					Version:        svc.Version,
 				},
 			)
 		}))

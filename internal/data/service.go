@@ -198,26 +198,46 @@ func (s ServiceModel) GetAll() (*[]Service, error) {
 	return &services, nil
 }
 
+func (s ServiceModel) InsertEvent(event *ServiceStateChangedEvent) error {
+	query := `INSERT INTO events (service_id, type, source, severity, layer, text, status, created_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+			RETURNING id`
+
+	args := []interface{}{event.ServiceID, "ServiceStateChangedEvent", event.Source, event.Severity,
+		event.Layer, event.Text, event.Status, event.CreatedAt}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := s.DB.QueryRowContext(ctx, query, args...).Scan(&event.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s ServiceModel) ServiceStateChangedHandler(eventChan <-chan event.Event) {
-	for event := range eventChan {
-		e, ok := event.Data.(ServiceStateChangedEvent) //TODO: wtf syntax!!
+	for events := range eventChan {
+		e, ok := events.Data.(ServiceStateChangedEvent) //TODO: wtf syntax!!
 		if !ok {
-			fmt.Println("Invalid event data")
+			fmt.Println("Invalid event data") //TODO: implement retry & dead letter mechanisms
 			continue
 		}
 
-		// Handle the event
-		fmt.Println("New user registered:")
-		fmt.Println("source:", e.Source)
-		fmt.Println("type:", e.Type)
-		fmt.Println("text:", e.Text)
+		err := s.InsertEvent(&e)
+		if err != nil {
+			fmt.Println("Error inserting event", err) //TODO: i need logger here!!
+		}
 	}
 }
 
 type ServiceStateChangedEvent struct {
+	ID        int64
+	ServiceID int64
 	Source    string
-	Type      string
+	Severity  string
 	Layer     string
 	CreatedAt time.Time
 	Text      string
+	Status    string
 }

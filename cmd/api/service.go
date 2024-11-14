@@ -54,12 +54,19 @@ func (app *application) createServiceHandler(w http.ResponseWriter, r *http.Requ
 		}
 		return
 	}
-	//TODO: change duration to interval
 	_, err = app.scheduler.NewJob(gocron.DurationJob(time.Duration(svc.Interval)*time.Second), gocron.NewTask(func() {
 		app.healthCheckService(
 			data.Service{
 				ID:             svc.ID,
 				HealthCheckUrl: svc.HealthCheckUrl,
+				Title:          svc.Title,
+				Description:    svc.Description,
+				CreatedAt:      svc.CreatedAt,
+				Interval:       svc.Interval,
+				EnvironmentID:  svc.EnvironmentID,
+				Status:         svc.Status,
+				Uptime:         svc.Uptime,
+				Version:        svc.Version,
 			},
 		)
 	}))
