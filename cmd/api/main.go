@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"flag"
 	"github.com/abbasimo/oplus/internal/data"
+	"github.com/abbasimo/oplus/internal/event"
 	"github.com/go-co-op/gocron/v2"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
@@ -30,6 +31,7 @@ type application struct {
 	models    data.Models
 	wg        sync.WaitGroup
 	scheduler gocron.Scheduler
+	eventBus  *event.EventBus
 }
 
 func main() {
@@ -60,11 +62,14 @@ func main() {
 
 	s, _ := gocron.NewScheduler()
 
+	eventBus := event.NewEventBus()
+
 	app := &application{
 		config:    cfg,
 		logger:    logger,
 		models:    data.NewModels(db),
 		scheduler: s,
+		eventBus:  eventBus,
 	}
 
 	// make a function that initialize scheduler
@@ -72,7 +77,8 @@ func main() {
 	// then register any service as a job with specific interval
 	// think about how add job in runtime
 	// maybe it's better to add following scheduler in application struct till accessible from handler
-	app.initializeJobScheduler(db)
+	app.initializeEventsSubscriberAndHandler()
+	app.initializeJobScheduler()
 
 	err = app.serve()
 	if err != nil {

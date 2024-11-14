@@ -181,7 +181,7 @@ func (app *application) listEnvironmentHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"environment": envs, "metadata": metadata}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"environments": envs, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

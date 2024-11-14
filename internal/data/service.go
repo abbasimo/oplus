@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"github.com/abbasimo/oplus/internal/event"
 	"github.com/abbasimo/oplus/internal/validator"
 	"time"
 )
@@ -57,7 +59,7 @@ func (s ServiceModel) Insert(svc *Service) error {
 	err := s.DB.QueryRowContext(ctx, query, args...).Scan(&svc.ID, &svc.CreatedAt, &svc.Version)
 	if err != nil {
 		if err.Error() == `pq: insert or update on table "service" violates foreign key constraint "service_environment_id_fkey"` {
-			return ErrEnvNotFound
+			return ErrEnvNotFound //TODO: what the fuck?!
 		} else {
 			return err
 		}
@@ -194,4 +196,28 @@ func (s ServiceModel) GetAll() (*[]Service, error) {
 		}
 	}
 	return &services, nil
+}
+
+func (s ServiceModel) ServiceStateChangedHandler(eventChan <-chan event.Event) {
+	for event := range eventChan {
+		e, ok := event.Data.(ServiceStateChangedEvent) //TODO: wtf syntax!!
+		if !ok {
+			fmt.Println("Invalid event data")
+			continue
+		}
+
+		// Handle the event
+		fmt.Println("New user registered:")
+		fmt.Println("source:", e.Source)
+		fmt.Println("type:", e.Type)
+		fmt.Println("text:", e.Text)
+	}
+}
+
+type ServiceStateChangedEvent struct {
+	Source    string
+	Type      string
+	Layer     string
+	CreatedAt time.Time
+	Text      string
 }

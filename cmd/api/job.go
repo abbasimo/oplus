@@ -1,13 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"github.com/abbasimo/oplus/internal/data"
 	"github.com/go-co-op/gocron/v2"
 	"time"
 )
 
-func (app *application) initializeJobScheduler(db *sql.DB) {
+func (app *application) initializeJobScheduler() {
 	// fetch all service from database
 	services, err := app.models.Service.GetAll()
 	if err != nil {
@@ -17,7 +16,7 @@ func (app *application) initializeJobScheduler(db *sql.DB) {
 	for _, svc := range *services {
 		// todo: can i add this job with some interval between them?!
 		_, err = app.scheduler.NewJob(gocron.DurationJob(time.Duration(svc.Interval)*time.Second), gocron.NewTask(func() {
-			data.CheckServiceHealth(app.models.Service.DB,
+			app.healthCheckService(
 				data.Service{
 					ID:             svc.ID,
 					HealthCheckUrl: svc.HealthCheckUrl,
