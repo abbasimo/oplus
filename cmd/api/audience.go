@@ -224,7 +224,7 @@ func (app *application) mappingContactToAudienceHandler(w http.ResponseWriter, r
 
 	v := validator.New()
 
-	_, err = app.models.Audience.MapContactToAudience(audienceID, contactID)
+	err = app.models.Audience.MapContactToAudience(audienceID, contactID)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrAudienceNotFound):

@@ -21,7 +21,7 @@ func (app *application) routes() http.Handler {
 	// GET		/audiences/:id					done
 	// DELETE	/audiences/:id					done
 	// PATCH	/audiences/:id					done
-	// PUT		/audiences/:id/contacts/:cid	not-ready
+	// PUT		/audiences/:id/contacts/:cid	done
 	//-------------------------------------
 	// POST		/contacts		done
 	// GET		/contacts		done
@@ -64,6 +64,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/contacts/:id", app.showContactHandler)
 	router.HandlerFunc(http.MethodPatch, "/contacts/:id", app.updateContactHandler)
 	router.HandlerFunc(http.MethodDelete, "/contacts/:id", app.deleteContactHandler)
+
+	router.HandlerFunc(http.MethodPost, "/rules", app.createRuleHandler)
 
 	return router
 }
