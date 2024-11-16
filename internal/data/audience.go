@@ -236,3 +236,30 @@ func (a AudienceModel) Delete(id int64) error {
 
 	return nil
 }
+
+func (a AudienceModel) MapContactToAudience(audienceID int64, contactID int64) (bool, error) {
+	if audienceID < 1 || contactID < 1 {
+		return false, ErrRecordNotFound
+	}
+
+	query := `INSERT INTO audiences_contacts (audience_id, contact_id) VALUES ($1, $2)`
+
+	args := []interface{}{audienceID, contactID}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := a.DB.QueryRowContext(ctx, query, args...).Scan()
+	if err != nil {
+		if err.Error() == `pq: insert or update on table "audiences_contacts" violates foreign key constraint "audiences_contacts_audience_id_fkey"` {
+			return false, ErrAudienceNotFound
+		} else if err.Error() == `pq: insert or update on table "audiences_contacts" violates foreign key constraint "audiences_contacts_contact_id_fkey"` {
+			return false, ErrContactNotFound
+		} else if err.Error() == `pq: duplicate key value violates unique constraint "audiences_contacts_pkey"` {
+			return false, ErrDuplicateRecord
+		} else {
+			return false, err
+		}
+	}
+	return true, nil
+}

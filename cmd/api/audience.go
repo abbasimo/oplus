@@ -187,3 +187,63 @@ func (app *application) deleteAudienceHandler(w http.ResponseWriter, r *http.Req
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) mappingContactToAudienceHandler(w http.ResponseWriter, r *http.Request) {
+	audienceID, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	contactID, err := app.readContactIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	/*	audience, err := app.models.Audience.Get(audienceID)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				app.notFoundResponse(w, r)
+			default:
+				app.serverErrorResponse(w, r, err)
+			}
+			return
+		}
+
+		contact, err := app.models.Contact.Get(contactID)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				app.notFoundResponse(w, r)
+			default:
+				app.serverErrorResponse(w, r, err)
+			}
+			return
+		}*/
+
+	v := validator.New()
+
+	_, err = app.models.Audience.MapContactToAudience(audienceID, contactID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrAudienceNotFound):
+			v.AddError("audience", "the audience with this id dose not exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		case errors.Is(err, data.ErrContactNotFound):
+			v.AddError("contact", "the contact with this id dose not exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		case errors.Is(err, data.ErrDuplicateRecord):
+			v.AddError("message", "record is duplicate")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "contact mapped to audience group"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}

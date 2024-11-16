@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
-	"github.com/abbasimo/oplus/internal/event"
 	"github.com/abbasimo/oplus/internal/validator"
 	"time"
 )
@@ -196,39 +194,6 @@ func (s ServiceModel) GetAll() (*[]Service, error) {
 		}
 	}
 	return &services, nil
-}
-
-func (s ServiceModel) InsertEvent(event *ServiceStateChangedEvent) error {
-	query := `INSERT INTO events (service_id, type, source, severity, layer, text, status, created_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-			RETURNING id`
-
-	args := []interface{}{event.ServiceID, "ServiceStateChangedEvent", event.Source, event.Severity,
-		event.Layer, event.Text, event.Status, event.CreatedAt}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	err := s.DB.QueryRowContext(ctx, query, args...).Scan(&event.ID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s ServiceModel) ServiceStateChangedHandler(eventChan <-chan event.Event) {
-	for events := range eventChan {
-		e, ok := events.Data.(ServiceStateChangedEvent) //TODO: wtf syntax!!
-		if !ok {
-			fmt.Println("Invalid event data") //TODO: implement retry & dead letter mechanisms
-			continue
-		}
-
-		err := s.InsertEvent(&e)
-		if err != nil {
-			fmt.Println("Error inserting event", err) //TODO: i need logger here!!
-		}
-	}
 }
 
 type ServiceStateChangedEvent struct {

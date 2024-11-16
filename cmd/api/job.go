@@ -31,11 +31,10 @@ func (app *application) initializeJobScheduler() {
 				},
 			)
 		}))
-
 		if err != nil {
 			app.logger.Error().Err(err).Msg("error creating job")
 		}
-
 	}
+	app.logger.Info().Msg("job(s) initialized successfully") //todo: really? are u sure?!
 	app.scheduler.Start()
 }

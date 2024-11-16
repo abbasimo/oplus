@@ -24,7 +24,7 @@ func (app *application) healthCheckService(svc data.Service) {
 		case errors.Is(err, ErrServiceUnreachable):
 			result, err := app.updateHealthCheck(svc.ID, string(data.Unhealthy))
 			if err != nil {
-				fmt.Println(err)
+				app.logger.Error().Err(err).Stack().Msg("there is a error in healthcheck service")
 			}
 			if result == "changed" {
 				app.fireUnhealthyEvent(&svc)
@@ -37,13 +37,14 @@ func (app *application) healthCheckService(svc data.Service) {
 	if ok {
 		result, err := app.updateHealthCheck(svc.ID, string(data.Healthy))
 		if err != nil {
-			fmt.Println(err)
+			app.logger.Error().Err(err).Stack().Msg("there is a error in update healthcheck")
 		}
 		if result == "changed" {
 			app.fireHealthyEvent(&svc)
 		}
 	}
 }
+
 func (app *application) pingService(svcUrl string) (bool, error) {
 	client := &http.Client{
 		Timeout: time.Second * 2, // todo: is it better to give from config?! idk!
@@ -75,24 +76,24 @@ func (app *application) updateHealthCheck(svcID int64, status string) (string, e
 }
 
 func (app *application) fireHealthyEvent(svc *data.Service) {
-	app.fireEvent(svc, "info", data.Healthy)
+	app.fireEvent(svc.ID, "info", data.Healthy, fmt.Sprintf("service %d:%s is healthy", svc.ID, svc.Title))
 }
 
 func (app *application) fireUnhealthyEvent(svc *data.Service) {
-	app.fireEvent(svc, "critical", data.Unhealthy)
+	app.fireEvent(svc.ID, "critical", data.Unhealthy, fmt.Sprintf("service %d:%s is unreachable", svc.ID, svc.Title))
 }
 
-func (app *application) fireEvent(svc *data.Service, severity string, status data.ServiceStatus) {
+func (app *application) fireEvent(id int64, severity string, status data.ServiceStatus, text string) {
 	app.eventBus.Publish(event.Event{
 		Type:      ServiceStateChanged,
 		Timestamp: time.Now(),
 		Data: data.ServiceStateChangedEvent{
-			ServiceID: svc.ID,
+			ServiceID: id,
 			Source:    "healthcheck",
 			Severity:  severity,
 			Layer:     "application",
 			CreatedAt: time.Now(),
-			Text:      fmt.Sprintf("Service %s (%d) is unreachable", svc.Title, svc.ID),
+			Text:      text,
 			Status:    string(status),
 		},
 	})

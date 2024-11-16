@@ -10,6 +10,7 @@ type Models struct {
 	Service     ServiceModel
 	Audience    AudienceModel
 	Contact     ContactModel
+	Event       EventModel
 	Generic     GenericModel
 }
 
@@ -23,14 +24,17 @@ func NewModels(db *sql.DB) Models {
 		Service:     ServiceModel{DB: db},
 		Audience:    AudienceModel{DB: db},
 		Contact:     ContactModel{DB: db},
+		Event:       EventModel{DB: db},
 		Generic:     GenericModel{DB: db},
 	}
 }
 
 var (
-	ErrDuplicateTitle  = errors.New("duplicate title")
-	ErrDuplicateRecord = errors.New("duplicate record")
-	ErrRecordNotFound  = errors.New("record not found")
-	ErrEditConflict    = errors.New("edit conflict")
-	ErrEnvNotFound     = errors.New("env not found")
+	ErrDuplicateTitle   = errors.New("duplicate title")
+	ErrDuplicateRecord  = errors.New("duplicate record")
+	ErrRecordNotFound   = errors.New("record not found")
+	ErrEditConflict     = errors.New("edit conflict")
+	ErrEnvNotFound      = errors.New("env not found")
+	ErrAudienceNotFound = errors.New("audience not found")
+	ErrContactNotFound  = errors.New("contact not found")
 )

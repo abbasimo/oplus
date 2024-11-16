@@ -6,7 +6,7 @@ import (
 )
 
 func (app *application) routes() http.Handler {
-	// NEEDS
+	//NEEDS
 
 	// 0. Create audience group (crud)
 	// 1. Add contacts to specific audience (create contact) (crud)
@@ -40,7 +40,7 @@ func (app *application) routes() http.Handler {
 	router := httprouter.New()
 	//TODO: I think env and service is a aggregate!
 	//TODO: I think i need some dto to return query, maybe in its file!
-	//TODO: what if user edit or delete a service !!!!
+	//TODO: what if user edit or delete a service !!!! must to save job information.
 	router.HandlerFunc(http.MethodPost, "/envs", app.createEnvironmentHandler)
 	router.HandlerFunc(http.MethodGet, "/envs", app.listEnvironmentHandler)
 	router.HandlerFunc(http.MethodGet, "/envs/:id", app.showEnvironmentHandler)
@@ -57,6 +57,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/audiences/:id", app.showAudienceHandler)
 	router.HandlerFunc(http.MethodPatch, "/audiences/:id", app.updateAudienceHandler)
 	router.HandlerFunc(http.MethodDelete, "/audiences/:id", app.deleteAudienceHandler)
+	router.HandlerFunc(http.MethodPut, "/audiences/:id/contacts/:cid", app.mappingContactToAudienceHandler)
 
 	router.HandlerFunc(http.MethodPost, "/contacts", app.createContactHandler)
 	router.HandlerFunc(http.MethodGet, "/contacts", app.listContactHandler)
