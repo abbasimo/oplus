@@ -33,11 +33,17 @@ func (app *application) createRuleHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = app.models.Audience.Insert(rule)
+	err = app.models.Rule.Insert(rule)
 	if err != nil {
 		switch {
-		case errors.Is(err, data.ErrDuplicateTitle):
-			v.AddError("title", "a audience with this title already exists")
+		case errors.Is(err, data.ErrDuplicateActionForRule):
+			v.AddError("action_ids", "the action already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		case errors.Is(err, data.ErrDuplicateAudienceForRule):
+			v.AddError("audience_ids", "the audience already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		case errors.Is(err, data.ErrFailedToCommit):
+			v.AddError("message", "failed to commit transaction")
 			app.failedValidationResponse(w, r, v.Errors)
 		default:
 			app.serverErrorResponse(w, r, err)
