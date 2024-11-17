@@ -26,3 +26,4 @@ create table rules_actions (
    action_id bigint not null references actions on delete cascade,
    primary key(rule_id, action_id)
 );
+

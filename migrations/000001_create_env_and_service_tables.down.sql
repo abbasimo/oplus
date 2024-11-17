@@ -1,2 +1,2 @@
-DROP TABLE IF EXISTS service;
-DROP TABLE IF EXISTS environment;
+drop table if exists service;
+drop table if exists environment;

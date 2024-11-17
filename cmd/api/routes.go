@@ -29,11 +29,11 @@ func (app *application) routes() http.Handler {
 	// DELETE	/contacts/:id	done
 	// PATCH	/contacts/:id	done
 	//-------------------------------------
-	// POST		/rules		not-ready
+	// POST		/rules		done
 	// GET		/rules		not-ready
-	// GET		/rules/:id	not-ready
-	// DELETE	/rules/:id	not-ready
-	// PATCH	/rules/:id	not-ready
+	// GET		/rules/:id	done
+	// DELETE	/rules/:id	done
+	// PATCH	/rules/:id	done
 	//-------------------------------------
 	// POST		/events		not-ready
 
@@ -66,6 +66,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/contacts/:id", app.deleteContactHandler)
 
 	router.HandlerFunc(http.MethodPost, "/rules", app.createRuleHandler)
+	router.HandlerFunc(http.MethodGet, "/rules", app.listRuleHandler)
+	router.HandlerFunc(http.MethodGet, "/rules/:id", app.showRuleHandler)
+	router.HandlerFunc(http.MethodPatch, "/rules/:id", app.updateRuleHandler)
+	router.HandlerFunc(http.MethodDelete, "/rules/:id", app.deleteRuleHandler)
 
 	return router
 }

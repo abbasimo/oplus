@@ -12,6 +12,7 @@ type Models struct {
 	Contact     ContactModel
 	Event       EventModel
 	Rule        RuleModel
+	Action      ActionModel
 	Generic     GenericModel
 }
 
@@ -27,6 +28,7 @@ func NewModels(db *sql.DB) Models {
 		Contact:     ContactModel{DB: db},
 		Event:       EventModel{DB: db},
 		Rule:        RuleModel{DB: db},
+		Action:      ActionModel{DB: db},
 		Generic:     GenericModel{DB: db},
 	}
 }
@@ -39,6 +41,7 @@ var (
 	ErrEnvNotFound              = errors.New("env not found")
 	ErrAudienceNotFound         = errors.New("audience not found")
 	ErrContactNotFound          = errors.New("contact not found")
+	ErrActionNotFound           = errors.New("action not found")
 	ErrDuplicateActionForRule   = errors.New("duplicate action for rule")
 	ErrDuplicateAudienceForRule = errors.New("duplicate audience for rule")
 	ErrFailedToCommit           = errors.New("failed to commit transaction")
