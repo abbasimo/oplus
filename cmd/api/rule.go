@@ -227,13 +227,27 @@ func (app *application) listRuleHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	contacts, metadata, err := app.models.Rule.GetAll(input.Source, input.Type, input.Filters)
+	rules, metadata, err := app.models.Rule.GetAll(input.Source, input.Type, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"contacts": contacts, "metadata": metadata}, nil)
+	for _, rule := range rules {
+		rule.Audiences, err = app.models.Audience.GetByRuleID(rule.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+
+		rule.Actions, err = app.models.Action.GetByRuleID(rule.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"rules": rules, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

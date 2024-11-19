@@ -288,33 +288,33 @@ func (r RuleModel) GetAll(phone_number string, full_name string, filters Filters
 
 	args := []interface{}{phone_number, full_name, filters.limit(), filters.offset()}
 
-	rows, err := c.DB.QueryContext(ctx, query, args...)
+	rows, err := r.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, Metadata{}, err
 	}
 	defer rows.Close()
 
 	totalRecords := 0
-	contacts := []*Contact{}
+	rules := []*Rule{}
 	for rows.Next() {
-		var contact Contact
+		var rule Rule
 		err := rows.Scan(
 			&totalRecords,
-			&contact.ID,
-			&contact.CreatedAt,
-			&contact.PhoneNumber,
-			&contact.FullName,
-			&contact.Version,
+			&rule.ID,
+			&rule.Source,
+			&rule.Type,
+			&rule.CreatedAt,
+			&rule.Version,
 		)
 		if err != nil {
 			return nil, Metadata{}, err
 		}
-		contacts = append(contacts, &contact)
+		rules = append(rules, &rule)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, Metadata{}, err
 	}
 	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
-	return contacts, metadata, nil
+	return rules, metadata, nil
 }
