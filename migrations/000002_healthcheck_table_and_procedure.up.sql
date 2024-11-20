@@ -1,5 +1,5 @@
 
-CREATE TABLE IF NOT EXISTS healthcheck (
+create table if not exists healthcheck (
        id bigserial PRIMARY KEY,
        service_id bigserial NOT NULL REFERENCES service ON DELETE CASCADE,
        start_time timestamp(0) with time zone NOT NULL,

@@ -34,3 +34,22 @@ begin
     return result;
 end;
 $$ language plpgsql;
+
+
+
+
+
+
+
+SELECT
+    id,
+    service_id,
+    start_time::date AS day,
+    GREATEST(start_time, start_time::date::timestamp) AS start_time,
+    LEAST(COALESCE(end_time, now()), start_time::date::timestamp + INTERVAL '1 day') AS end_time,
+    EXTRACT(EPOCH FROM LEAST(COALESCE(end_time, now()), start_time::date::timestamp + INTERVAL '1 day')
+        - GREATEST(start_time, start_time::date::timestamp)) AS downtime_seconds
+FROM healthcheck
+WHERE status = 'unhealthy'
+  AND service_id = 1
+  AND start_time >= NOW() - INTERVAL '90 days';
