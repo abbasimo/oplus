@@ -58,10 +58,6 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 				FROM environment
 				WHERE id = $1`
 
-	svcQuery := `SELECT id, created_at, title, description, version, interval, health_check_url
-				FROM service
-				WHERE environment_id = $1`
-
 	var env Environment
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -83,6 +79,13 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 		}
 	}
 
+	svcQuery := `select id, created_at, title, description, version, environment_id,
+					   interval, health_check_url,
+					   (select status from healthcheck where service_id = service.id order by id desc limit 1) as status,
+					   get_uptime(service.id) as uptime
+				from service
+				where environment_id = $1;`
+
 	svcRows, er := e.DB.QueryContext(ctx, svcQuery, id)
 	if er != nil {
 		return &env, nil
@@ -97,8 +100,11 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 			&svc.Title,
 			&svc.Description,
 			&svc.Version,
+			&svc.EnvironmentID,
 			&svc.Interval,
 			&svc.HealthCheckUrl,
+			&svc.Status,
+			&svc.Uptime,
 		)
 		env.Services = append(env.Services, svc)
 	}

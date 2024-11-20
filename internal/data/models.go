@@ -13,6 +13,7 @@ type Models struct {
 	Event       EventModel
 	Rule        RuleModel
 	Action      ActionModel
+	Job         JobModel
 	Generic     GenericModel
 }
 
@@ -29,6 +30,7 @@ func NewModels(db *sql.DB) Models {
 		Event:       EventModel{DB: db},
 		Rule:        RuleModel{DB: db},
 		Action:      ActionModel{DB: db},
+		Job:         JobModel{DB: db},
 		Generic:     GenericModel{DB: db},
 	}
 }

@@ -8,34 +8,9 @@ import (
 func (app *application) routes() http.Handler {
 	//NEEDS
 
-	// 0. Create audience group (crud)
-	// 1. Add contacts to specific audience (create contact) (crud)
-	// 2. Create rule (crud)
-	// 3. Create receive event endpoint
-
-	// when an event received, fetch all rules, do according rule, then submit event on database
-
-	// endpoints:
-	// POST		/audiences						done
-	// GET		/audiences						done
-	// GET		/audiences/:id					done
-	// DELETE	/audiences/:id					done
-	// PATCH	/audiences/:id					done
-	// PUT		/audiences/:id/contacts/:cid	done
-	//-------------------------------------
-	// POST		/contacts		done
-	// GET		/contacts		done
-	// GET		/contacts/:id	done
-	// DELETE	/contacts/:id	done
-	// PATCH	/contacts/:id	done
-	//-------------------------------------
-	// POST		/rules		done
-	// GET		/rules		not-ready
-	// GET		/rules/:id	done
-	// DELETE	/rules/:id	done
-	// PATCH	/rules/:id	done
-	//-------------------------------------
-	// POST		/events		not-ready
+	// remove job if job edited or deleted
+	// match endpoints with pages
+	//
 
 	router := httprouter.New()
 	//TODO: I think env and service is a aggregate!

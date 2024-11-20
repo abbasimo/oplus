@@ -70,9 +70,12 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*Service, error) {
 		return nil, ErrRecordNotFound
 	}
 
-	query := `	SELECT id, created_at, title, description, version, environment_id, interval, health_check_url
-				FROM service
-				WHERE id = $1 and environment_id = $2`
+	query := `	select id, created_at, title, description, version, environment_id,
+					   interval, health_check_url,
+					   (select status from healthcheck where service_id = $1 order by id desc limit 1) as status,
+					   get_uptime(id) as uptime
+				from service
+				where id = $1 and environment_id = $2;`
 
 	var svc Service
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -87,6 +90,8 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*Service, error) {
 		&svc.EnvironmentID,
 		&svc.Interval,
 		&svc.HealthCheckUrl,
+		&svc.Status,
+		&svc.Uptime,
 	)
 
 	if err != nil {

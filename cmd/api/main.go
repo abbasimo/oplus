@@ -72,11 +72,6 @@ func main() {
 		eventBus:  eventBus,
 	}
 
-	// make a function that initialize scheduler
-	// in that function must fetch any service from database
-	// then register any service as a job with specific interval
-	// think about how add job in runtime
-	// maybe it's better to add following scheduler in application struct till accessible from handler
 	app.initializeEventsSubscriberAndHandler()
 	app.initializeJobScheduler()
 

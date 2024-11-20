@@ -18,10 +18,10 @@ DECLARE
     result_text TEXT;
 BEGIN
     -- Step 1: Get the last record of the specified service_id
-    SELECT * INTO last_record
+    SELECT id, service_id, start_time, end_time, status, version INTO last_record
     FROM healthcheck
     WHERE service_id = p_service_id
-   -- ORDER BY start_time DESC
+   -- ORDER BY id DESC
     ORDER BY id DESC
     LIMIT 1;
 

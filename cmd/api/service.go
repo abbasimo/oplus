@@ -4,9 +4,7 @@ import (
 	"errors"
 	"github.com/abbasimo/oplus/internal/data"
 	"github.com/abbasimo/oplus/internal/validator"
-	"github.com/go-co-op/gocron/v2"
 	"net/http"
-	"time"
 )
 
 func (app *application) createServiceHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,23 +52,12 @@ func (app *application) createServiceHandler(w http.ResponseWriter, r *http.Requ
 		}
 		return
 	}
-	_, err = app.scheduler.NewJob(gocron.DurationJob(time.Duration(svc.Interval)*time.Second), gocron.NewTask(func() {
-		app.healthCheckService(
-			data.Service{
-				ID:             svc.ID,
-				HealthCheckUrl: svc.HealthCheckUrl,
-				Title:          svc.Title,
-				Description:    svc.Description,
-				CreatedAt:      svc.CreatedAt,
-				Interval:       svc.Interval,
-				EnvironmentID:  svc.EnvironmentID,
-				Status:         svc.Status,
-				Uptime:         svc.Uptime,
-				Version:        svc.Version,
-			},
-		)
-	}))
 
+	job, err := app.createJob(svc)
+	if err != nil {
+		app.serverErrorResponse(w, r, err) // todo: what if job failed to creation? insert done
+	}
+	err = app.models.Job.UpdateSchedulerStatus(svc.ID, job.ID())
 	if err != nil {
 		app.logger.Error().Err(err).Msg("error creating job")
 	}
@@ -146,6 +133,13 @@ func (app *application) updateServiceHandler(w http.ResponseWriter, r *http.Requ
 		}
 		return
 	}
+
+	err = updateJob(app, svc)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	err = app.writeJSON(w, http.StatusOK, envelope{"service": svc}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -210,4 +204,27 @@ func (app *application) showServiceHandler(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+func updateJob(app *application, svc *data.Service) error {
+	oldJobID, err := app.models.Job.GetJobID(svc.ID)
+	if err != nil {
+		return err
+	}
+
+	err = app.scheduler.RemoveJob(oldJobID)
+	if err != nil {
+		return err
+	}
+
+	job, err := app.createJob(svc)
+	if err != nil {
+		return err
+	}
+
+	err = app.models.Job.UpdateSchedulerStatus(svc.ID, job.ID())
+	if err != nil {
+		return err
+	}
+	return nil
 }
