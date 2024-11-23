@@ -30,7 +30,7 @@ type EnvironmentModel struct {
 }
 
 func (e EnvironmentModel) Insert(env *Environment) error {
-	query := `  INSERT INTO environment (title, description)
+	query := `  INSERT INTO environments (title, description)
 				VALUES ($1, $2)
 				RETURNING id, created_at, version`
 
@@ -55,7 +55,7 @@ func (e EnvironmentModel) Get(id int64) (*GetEnvironmentQueryResult, error) {
 		return nil, ErrRecordNotFound
 	}
 	envQuery := `SELECT id, created_at, title, description, version
-				FROM environment
+				FROM environments
 				WHERE id = $1`
 
 	var env GetEnvironmentQueryResult
@@ -83,7 +83,7 @@ func (e EnvironmentModel) Get(id int64) (*GetEnvironmentQueryResult, error) {
 					   interval, health_check_url,
 					   (select status from healthcheck where service_id = service.id order by id desc limit 1) as status,
 					   get_uptime(service.id) as uptime
-				from service
+				from services
 				where environment_id = $1;`
 
 	svcRows, er := e.DB.QueryContext(ctx, svcQuery, id)
@@ -116,7 +116,7 @@ func (e EnvironmentModel) GetWithoutServices(id int64) (*GetEnvironmentWithoutSe
 		return nil, ErrRecordNotFound
 	}
 	envQuery := `SELECT id, created_at, title, description, version
-				FROM environment
+				FROM environments
 				WHERE id = $1`
 
 	var env GetEnvironmentWithoutServicesQueryResult
@@ -144,7 +144,7 @@ func (e EnvironmentModel) GetWithoutServices(id int64) (*GetEnvironmentWithoutSe
 }
 
 func (e EnvironmentModel) Update(env *Environment) error {
-	query := `  UPDATE environment
+	query := `  UPDATE environments
 				SET title = $1, description = $2, version = version + 1
 				WHERE id = $3 AND version = $4
 				RETURNING version`
@@ -176,7 +176,7 @@ func (e EnvironmentModel) Delete(id int64) error {
 		return ErrRecordNotFound
 	}
 
-	query := `DELETE FROM environment WHERE id = $1`
+	query := `DELETE FROM environments WHERE id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -200,7 +200,7 @@ func (e EnvironmentModel) Delete(id int64) error {
 
 func (e EnvironmentModel) GetAll(title string, description string, filters Filters) ([]*GetAllEnvironmentsQueryResult, Metadata, error) {
 	query := fmt.Sprintf(`SELECT count(*) OVER(), id, created_at, title, description
-								FROM environment
+								FROM environments
 								WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 								AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $2) OR $2 = '')
 								ORDER BY %s %s, id ASC

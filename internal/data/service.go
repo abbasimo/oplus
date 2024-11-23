@@ -71,7 +71,7 @@ func ValidateService(v *validator.Validator, svc *Service) {
 }
 
 func (s ServiceModel) Insert(svc *Service) error {
-	query := `INSERT INTO service (environment_id, title, description, health_check_url, interval)
+	query := `INSERT INTO services (environment_id, title, description, health_check_url, interval)
 			VALUES ($1, $2, $3, $4, $5) 
 			RETURNING id, created_at, version`
 
@@ -100,7 +100,7 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*GetServiceQueryResult, err
 					   interval, health_check_url,
 					   (select status from healthcheck where service_id = $1 order by id desc limit 1) as status,
 					   get_uptime(id) as uptime
-				from service
+				from services
 				where id = $1 and environment_id = $2;`
 
 	var svc GetServiceQueryResult
@@ -195,7 +195,7 @@ func (s ServiceModel) GetOutages(envID int64, svcID int64) (*[]GetOutagesQueryRe
 }
 
 func (s ServiceModel) Update(svc *Service) error {
-	query := `  UPDATE service
+	query := `  UPDATE services
 				SET title = $1, description = $2, health_check_url = $3, interval = $4, version = version + 1
 				WHERE id = $5 AND version = $6
 				RETURNING version`
@@ -229,7 +229,7 @@ func (s ServiceModel) Delete(envID int64, svcID int64) error {
 		return ErrRecordNotFound
 	}
 
-	query := `DELETE FROM service WHERE environment_id = $1 and id = $2`
+	query := `DELETE FROM services WHERE environment_id = $1 and id = $2`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -254,7 +254,7 @@ func (s ServiceModel) Delete(envID int64, svcID int64) error {
 func (s ServiceModel) GetAll() (*[]Service, error) {
 
 	query := `	SELECT id, created_at, title, description, version, environment_id, interval, health_check_url
-				FROM service
+				FROM services
 				`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
