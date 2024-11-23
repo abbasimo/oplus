@@ -18,7 +18,7 @@ func (app *application) createServiceHandler(w http.ResponseWriter, r *http.Requ
 		Title          string `json:"title"`
 		Description    string `json:"description"`
 		HealthCheckUrl string `json:"health_check_url"`
-		Interval       int64  `json:"interval"`
+		Interval       int    `json:"interval"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -80,7 +80,7 @@ func (app *application) updateServiceHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	svc, err := app.models.Service.Get(envID, svcID)
+	svcQr, err := app.models.Service.Get(envID, svcID)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -95,13 +95,26 @@ func (app *application) updateServiceHandler(w http.ResponseWriter, r *http.Requ
 		Title          *string `json:"title"`
 		Description    *string `json:"description"`
 		HealthCheckUrl *string `json:"health_check_url"`
-		Interval       *int64  `json:"interval"`
+		Interval       *int    `json:"interval"`
 	}
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
+	}
+
+	svc := &data.Service{
+		ID:             svcQr.ID,
+		Title:          svcQr.Title,
+		Description:    svcQr.Description,
+		HealthCheckUrl: svcQr.HealthCheckUrl,
+		Interval:       svcQr.Interval,
+		EnvironmentID:  svcQr.EnvironmentID,
+		Status:         svcQr.Status,
+		Uptime:         svcQr.Uptime,
+		CreatedAt:      svcQr.CreatedAt,
+		Version:        svcQr.Version,
 	}
 
 	if input.Title != nil {
@@ -201,6 +214,36 @@ func (app *application) showServiceHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"service": svc}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) showServiceOutagesHandler(w http.ResponseWriter, r *http.Request) {
+	envID, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	svcID, err := app.readServiceIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	outages, err := app.models.Service.GetOutages(envID, svcID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"outage": outages}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

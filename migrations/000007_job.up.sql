@@ -38,18 +38,48 @@ $$ language plpgsql;
 
 
 
-
-
-
+create or replace view outages_90days_view as (
+WITH healthcheck_filtered AS (
+    SELECT
+        id,
+        service_id,
+        status,
+        start_time,
+        COALESCE(end_time, NOW()) AS end_time
+    FROM healthcheck
+    WHERE status = 'unhealthy'
+      AND start_time >= NOW() - INTERVAL '90 days'
+),
+     daily_segments AS (
+         SELECT
+             id,
+             service_id,
+             status,
+             start_time::date AS day,
+             GREATEST(start_time, day::timestamp) AS segment_start_time,
+             LEAST(end_time, (day + INTERVAL '1 day')::timestamp) AS segment_end_time
+         FROM (
+                  SELECT
+                      id,
+                      service_id,
+                      status,
+                      start_time,
+                      end_time,
+                      generate_series(
+                              start_time::date,
+                              end_time::date,
+                              '1 day'::interval
+                      ) AS day
+                  FROM healthcheck_filtered
+              ) AS expanded
+     )
 SELECT
     id,
     service_id,
-    start_time::date AS day,
-    GREATEST(start_time, start_time::date::timestamp) AS start_time,
-    LEAST(COALESCE(end_time, now()), start_time::date::timestamp + INTERVAL '1 day') AS end_time,
-    EXTRACT(EPOCH FROM LEAST(COALESCE(end_time, now()), start_time::date::timestamp + INTERVAL '1 day')
-        - GREATEST(start_time, start_time::date::timestamp)) AS downtime_seconds
-FROM healthcheck
-WHERE status = 'unhealthy'
-  AND service_id = 1
-  AND start_time >= NOW() - INTERVAL '90 days';
+    segment_start_time::date AS day,
+    segment_start_time,
+    segment_end_time,
+    EXTRACT(EPOCH FROM segment_end_time - segment_start_time) AS downtime_seconds
+FROM daily_segments
+ORDER BY day, segment_start_time);
+

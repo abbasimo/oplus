@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/abbasimo/oplus/internal/validator"
 	"time"
 )
@@ -15,10 +16,35 @@ type Service struct {
 	Description    string        `json:"description"`
 	Uptime         int64         `json:"uptime"`
 	HealthCheckUrl string        `json:"health_check_url"`
-	Interval       int64         `json:"interval"` // todo: why this value is int64?! int is enough
+	Interval       int           `json:"interval"`
 	CreatedAt      time.Time     `json:"-"`
 	Version        int           `json:"-"`
 	Status         ServiceStatus `json:"status"`
+}
+
+type GetServiceQueryResult struct {
+	ID             int64         `json:"id"`
+	EnvironmentID  int64         `json:"environment_id"`
+	Title          string        `json:"title"`
+	Description    string        `json:"description"`
+	Uptime         int64         `json:"uptime"` // todo: can delete this property?!
+	HealthCheckUrl string        `json:"health_check_url"`
+	Interval       int           `json:"interval"`
+	CreatedAt      time.Time     `json:"created_at"`
+	Version        int           `json:"-"`
+	Status         ServiceStatus `json:"status"`
+}
+
+type GetOutagesQueryResult struct {
+	Date    time.Time           `json:"date"`
+	Outages []OutageQueryResult `json:"outages"`
+}
+
+type OutageQueryResult struct {
+	StartTime        time.Time `json:"start_time"`
+	EndTime          time.Time `json:"end_time"`
+	Text             string    `json:"text"`
+	DowntimeDuration int       `json:"downtime_duration"`
 }
 
 type ServiceStatus string
@@ -65,19 +91,19 @@ func (s ServiceModel) Insert(svc *Service) error {
 	return nil
 }
 
-func (s ServiceModel) Get(envID int64, svcID int64) (*Service, error) {
+func (s ServiceModel) Get(envID int64, svcID int64) (*GetServiceQueryResult, error) {
 	if envID < 1 || svcID < 1 {
 		return nil, ErrRecordNotFound
 	}
 
-	query := `	select id, created_at, title, description, version, environment_id,
+	query := `	select id, created_at, title, description, environment_id, version,
 					   interval, health_check_url,
 					   (select status from healthcheck where service_id = $1 order by id desc limit 1) as status,
 					   get_uptime(id) as uptime
 				from service
 				where id = $1 and environment_id = $2;`
 
-	var svc Service
+	var svc GetServiceQueryResult
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -86,8 +112,8 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*Service, error) {
 		&svc.CreatedAt,
 		&svc.Title,
 		&svc.Description,
-		&svc.Version,
 		&svc.EnvironmentID,
+		&svc.Version,
 		&svc.Interval,
 		&svc.HealthCheckUrl,
 		&svc.Status,
@@ -103,6 +129,69 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*Service, error) {
 		}
 	}
 	return &svc, nil
+}
+
+func (s ServiceModel) GetOutages(envID int64, svcID int64) (*[]GetOutagesQueryResult, error) {
+	if envID < 1 || svcID < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	query := `select day, segment_start_time, segment_end_time, downtime_seconds
+    			from outages_90days_view
+    			where service_id = $1;`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := s.DB.QueryContext(ctx, query, svcID)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	defer rows.Close()
+
+	outageMap := make(map[time.Time][]OutageQueryResult)
+
+	for rows.Next() {
+		var day time.Time
+		var startTime, endTime time.Time
+		var downtimeSeconds float64
+
+		if err := rows.Scan(&day, &startTime, &endTime, &downtimeSeconds); err != nil {
+			return nil, err
+		}
+
+		// Create OutageQueryResult
+		outage := OutageQueryResult{
+			StartTime:        startTime,
+			EndTime:          endTime,
+			Text:             fmt.Sprintf("Outage from %s to %s", startTime, endTime), // Custom text
+			DowntimeDuration: int(downtimeSeconds),
+		}
+
+		// Append to the map
+		outageMap[day] = append(outageMap[day], outage)
+	}
+
+	// Check for any row errors
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Convert map to list of GetOutagesQueryResult
+	var results []GetOutagesQueryResult
+	for date, outages := range outageMap {
+		results = append(results, GetOutagesQueryResult{
+			Date:    date,
+			Outages: outages,
+		})
+	}
+
+	return &results, nil
 }
 
 func (s ServiceModel) Update(svc *Service) error {

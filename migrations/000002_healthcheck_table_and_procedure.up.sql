@@ -8,6 +8,11 @@ create table if not exists healthcheck (
        version integer NOT NULL DEFAULT 1
 );
 
+-- Create index for outage view
+CREATE INDEX idx_healthcheck_status_service_start
+    ON healthcheck (status, service_id, start_time);
+
+
  -- TODO: handle concurrency for update record with version
 CREATE OR REPLACE FUNCTION update_healthcheck(
     p_service_id BIGINT,

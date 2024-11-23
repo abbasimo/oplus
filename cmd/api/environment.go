@@ -78,7 +78,7 @@ func (app *application) updateEnvironmentHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	env, err := app.models.Environment.Get(id)
+	envQr, err := app.models.Environment.GetWithoutServices(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -87,6 +87,14 @@ func (app *application) updateEnvironmentHandler(w http.ResponseWriter, r *http.
 			app.serverErrorResponse(w, r, err)
 		}
 		return
+	}
+
+	env := &data.Environment{
+		Title:       envQr.Title,
+		Description: envQr.Description,
+		ID:          envQr.ID,
+		CreatedAt:   envQr.CreatedAt,
+		Version:     envQr.Version,
 	}
 
 	var input struct {
@@ -101,10 +109,10 @@ func (app *application) updateEnvironmentHandler(w http.ResponseWriter, r *http.
 	}
 
 	if input.Title != nil {
-		env.Title = *input.Title
+		envQr.Title = *input.Title
 	}
 	if input.Description != nil {
-		env.Description = *input.Description
+		envQr.Description = *input.Description
 	}
 	v := validator.New()
 	if data.ValidateEnvironment(v, env); !v.Valid() {
@@ -122,7 +130,7 @@ func (app *application) updateEnvironmentHandler(w http.ResponseWriter, r *http.
 		}
 		return
 	}
-	err = app.writeJSON(w, http.StatusOK, envelope{"environment": env}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"environment": envQr}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

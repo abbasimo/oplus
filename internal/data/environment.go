@@ -50,7 +50,7 @@ func (e EnvironmentModel) Insert(env *Environment) error {
 	return nil
 }
 
-func (e EnvironmentModel) Get(id int64) (*Environment, error) {
+func (e EnvironmentModel) Get(id int64) (*GetEnvironmentQueryResult, error) {
 	if id < 1 {
 		return nil, ErrRecordNotFound
 	}
@@ -58,7 +58,7 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 				FROM environment
 				WHERE id = $1`
 
-	var env Environment
+	var env GetEnvironmentQueryResult
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -79,7 +79,7 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 		}
 	}
 
-	svcQuery := `select id, created_at, title, description, version, environment_id,
+	svcQuery := `select id, created_at, title, description, environment_id,
 					   interval, health_check_url,
 					   (select status from healthcheck where service_id = service.id order by id desc limit 1) as status,
 					   get_uptime(service.id) as uptime
@@ -93,13 +93,12 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 	defer svcRows.Close()
 
 	for svcRows.Next() {
-		var svc Service
+		var svc GetServiceQueryResult
 		svcRows.Scan(
 			&svc.ID,
 			&svc.CreatedAt,
 			&svc.Title,
 			&svc.Description,
-			&svc.Version,
 			&svc.EnvironmentID,
 			&svc.Interval,
 			&svc.HealthCheckUrl,
@@ -107,6 +106,38 @@ func (e EnvironmentModel) Get(id int64) (*Environment, error) {
 			&svc.Uptime,
 		)
 		env.Services = append(env.Services, svc)
+	}
+
+	return &env, nil
+}
+
+func (e EnvironmentModel) GetWithoutServices(id int64) (*GetEnvironmentWithoutServicesQueryResult, error) {
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+	envQuery := `SELECT id, created_at, title, description, version
+				FROM environment
+				WHERE id = $1`
+
+	var env GetEnvironmentWithoutServicesQueryResult
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := e.DB.QueryRowContext(ctx, envQuery, id).Scan(
+		&env.ID,
+		&env.CreatedAt,
+		&env.Title,
+		&env.Description,
+		&env.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
 	}
 
 	return &env, nil
@@ -167,8 +198,8 @@ func (e EnvironmentModel) Delete(id int64) error {
 	return nil
 }
 
-func (e EnvironmentModel) GetAll(title string, description string, filters Filters) ([]*Environment, Metadata, error) {
-	query := fmt.Sprintf(`SELECT count(*) OVER(), id, created_at, title, description, version
+func (e EnvironmentModel) GetAll(title string, description string, filters Filters) ([]*GetAllEnvironmentsQueryResult, Metadata, error) {
+	query := fmt.Sprintf(`SELECT count(*) OVER(), id, created_at, title, description
 								FROM environment
 								WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 								AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $2) OR $2 = '')
@@ -187,16 +218,15 @@ func (e EnvironmentModel) GetAll(title string, description string, filters Filte
 	defer rows.Close()
 
 	totalRecords := 0
-	envs := []*Environment{}
+	envs := []*GetAllEnvironmentsQueryResult{}
 	for rows.Next() {
-		var env Environment
+		var env GetAllEnvironmentsQueryResult
 		err := rows.Scan(
 			&totalRecords,
 			&env.ID,
 			&env.CreatedAt,
 			&env.Title,
 			&env.Description,
-			&env.Version,
 		)
 		if err != nil {
 			return nil, Metadata{}, err
@@ -209,4 +239,28 @@ func (e EnvironmentModel) GetAll(title string, description string, filters Filte
 	}
 	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
 	return envs, metadata, nil
+}
+
+type GetEnvironmentQueryResult struct {
+	ID          int64                   `json:"id"`
+	Title       string                  `json:"title"`
+	Description string                  `json:"description"`
+	CreatedAt   time.Time               `json:"created_at"`
+	Version     int                     `json:"-"`
+	Services    []GetServiceQueryResult `json:"services"`
+}
+
+type GetEnvironmentWithoutServicesQueryResult struct {
+	ID          int64     `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	Version     int       `json:"-"`
+}
+
+type GetAllEnvironmentsQueryResult struct {
+	ID          int64     `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
 }
