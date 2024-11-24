@@ -19,10 +19,8 @@ type ActionModel struct {
 
 func (a ActionModel) GetByRuleID(ruleID int64) ([]*Action, error) {
 
-	query := `select a.id, a.title, a.version, a.created_at
-				from actions a 
-				left join public.rules_actions ra on a.id = ra.action_id
-				where ra.rule_id = $1`
+	query := `select a.id, a.title, a.version, a.created_at from actions a 
+				left join public.rules_actions ra on a.id = ra.action_id where ra.rule_id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

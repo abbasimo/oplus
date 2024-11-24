@@ -23,9 +23,8 @@ type EventModel struct {
 }
 
 func (e EventModel) Insert(event *Event) error {
-	query := `INSERT INTO events (service_id, type, source, severity, layer, text, status, created_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-			RETURNING id`
+	query := `insert into events (service_id, type, source, severity, layer, text, status, created_at)
+			values ($1, $2, $3, $4, $5, $6, $7, $8)  returning id`
 
 	args := []interface{}{event.ServiceID, event.Type, event.Source, event.Severity,
 		event.Layer, event.Text, event.Status, event.CreatedAt}

@@ -51,12 +51,9 @@ func (c ContactModel) Insert(contact *Contact) error {
 }
 
 func (c ContactModel) GetAll(phone_number string, full_name string, filters Filters) ([]*Contact, Metadata, error) {
-	query := fmt.Sprintf(`SELECT count(*) OVER(), id, created_at, phone_number, full_name, version
-								FROM contacts
-								WHERE (phone_number = $1 OR $1 = '')
-								AND (to_tsvector('simple', full_name) @@ plainto_tsquery('simple', $2) OR $2 = '')
-								ORDER BY %s %s, id ASC
-								LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
+	query := fmt.Sprintf(`select count(*) over(), id, created_at, phone_number, full_name, version from contacts
+								where (phone_number = $1 OR $1 = '') and (to_tsvector('simple', full_name) @@ plainto_tsquery('simple', $2) or $2 = '')
+								order by %s %s, id asc limit $3 offset $4`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -99,9 +96,7 @@ func (c ContactModel) Get(id int64) (*Contact, error) {
 		return nil, ErrRecordNotFound
 	}
 
-	query := `SELECT id, created_at, phone_number, full_name, version
-				FROM contacts
-				WHERE id = $1`
+	query := `select id, created_at, phone_number, full_name, version from contacts where id = $1`
 
 	var contact Contact
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -128,10 +123,8 @@ func (c ContactModel) Get(id int64) (*Contact, error) {
 }
 
 func (c ContactModel) Update(contact *Contact) error {
-	query := `  UPDATE contacts
-				SET phone_number = $1, full_name = $2, version = version + 1
-				WHERE id = $3 AND version = $4
-				RETURNING version`
+	query := `  update contacts set phone_number = $1, full_name = $2, version = version + 1
+				where id = $3 and version = $4 returning version`
 
 	args := []interface{}{
 		contact.PhoneNumber,
@@ -160,7 +153,7 @@ func (c ContactModel) Delete(id int64) error {
 		return ErrRecordNotFound
 	}
 
-	query := `DELETE FROM contacts WHERE id = $1`
+	query := `delete from contacts where id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

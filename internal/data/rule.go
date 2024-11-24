@@ -20,6 +20,7 @@ type Rule struct {
 	CreatedAt   time.Time   `json:"-"`
 	Version     int         `json:"-"`
 }
+
 type RuleModel struct {
 	DB *sql.DB
 }
@@ -92,7 +93,7 @@ func (r RuleModel) Delete(ruleID int64) error {
 		return ErrRecordNotFound
 	}
 
-	query := `DELETE FROM rules WHERE id = $1`
+	query := `delete from rules where id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -118,6 +119,7 @@ func (r RuleModel) Get(id int64) (*Rule, error) {
 	if id < 1 {
 		return nil, ErrRecordNotFound
 	}
+
 	query := `select id, type, source, version, created_at from rules where id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -140,10 +142,8 @@ func (r RuleModel) Get(id int64) (*Rule, error) {
 		}
 	}
 
-	actionQuery := `select a.id, a.title, a.version, a.created_at
-				from actions a 
-				left join public.rules_actions ra on a.id = ra.action_id
-				where ra.rule_id = $1`
+	actionQuery := `select a.id, a.title, a.version, a.created_at from actions a  
+    				left join public.rules_actions ra on a.id = ra.action_id where ra.rule_id = $1`
 
 	actionRows, err := r.DB.QueryContext(ctx, actionQuery, id)
 	if err != nil {
@@ -165,10 +165,8 @@ func (r RuleModel) Get(id int64) (*Rule, error) {
 	}
 	rule.Actions = actions
 
-	audienceQuery := `select a.id, a.title, a.description, a.version, a.created_at
-				from audiences a 
-				left join public.rules_audiences ra on a.id = ra.audience_id
-				where ra.rule_id = $1`
+	audienceQuery := `select a.id, a.title, a.description, a.version, a.created_at from audiences a 
+					left join public.rules_audiences ra on a.id = ra.audience_id where ra.rule_id = $1`
 
 	audienceRows, err := r.DB.QueryContext(ctx, audienceQuery, id)
 	if err != nil {
@@ -200,10 +198,8 @@ func (r RuleModel) Update(rule *Rule) error {
 		return err
 	}
 
-	query := `  update rules
-				set source = $1, type = $2, version = version + 1
-				where id = $3 and version = $4
-				returning version`
+	query := `  update rules set source = $1, type = $2, version = version + 1
+				where id = $3 and version = $4 returning version`
 
 	args := []interface{}{
 		rule.Source,
@@ -275,18 +271,16 @@ func (r RuleModel) Update(rule *Rule) error {
 	return nil
 }
 
-func (r RuleModel) GetAll(phone_number string, full_name string, filters Filters) ([]*Rule, Metadata, error) {
-	query := fmt.Sprintf(`select count(*) over(), id, source, type, created_at, version
-								from rules
-								where (source = $1 or $1 = '')
-								and (type = $2 or $2 = '')
-								order by %s %s, id asc
-								limit $3 offset $4`, filters.sortColumn(), filters.sortDirection())
+func (r RuleModel) GetAll(phoneNumber string, fullName string, filters Filters) ([]*Rule, Metadata, error) {
+
+	query := fmt.Sprintf(`select count(*) over(), id, source, type, created_at, version from rules
+								where (source = $1 or $1 = '') and (type = $2 or $2 = '')
+								order by %s %s, id asc limit $3 offset $4`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []interface{}{phone_number, full_name, filters.limit(), filters.offset()}
+	args := []interface{}{phoneNumber, fullName, filters.limit(), filters.offset()}
 
 	rows, err := r.DB.QueryContext(ctx, query, args...)
 	if err != nil {

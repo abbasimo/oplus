@@ -30,9 +30,7 @@ type EnvironmentModel struct {
 }
 
 func (e EnvironmentModel) Insert(env *Environment) error {
-	query := `  INSERT INTO environments (title, description)
-				VALUES ($1, $2)
-				RETURNING id, created_at, version`
+	query := `insert into environments (title, description) values ($1, $2) returning id, created_at, version`
 
 	args := []interface{}{env.Title, env.Description}
 
@@ -54,9 +52,8 @@ func (e EnvironmentModel) Get(id int64) (*GetEnvironmentQueryResult, error) {
 	if id < 1 {
 		return nil, ErrRecordNotFound
 	}
-	envQuery := `SELECT id, created_at, title, description, version
-				FROM environments
-				WHERE id = $1`
+
+	envQuery := `select id, created_at, title, description, version from environments where id = $1`
 
 	var env GetEnvironmentQueryResult
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -79,12 +76,10 @@ func (e EnvironmentModel) Get(id int64) (*GetEnvironmentQueryResult, error) {
 		}
 	}
 
-	svcQuery := `select id, created_at, title, description, environment_id,
-					   interval, health_check_url,
-					   (select status from healthcheck where service_id = service.id order by id desc limit 1) as status,
-					   get_uptime(service.id) as uptime
-				from services
-				where environment_id = $1;`
+	svcQuery := `select id, created_at, title, description, environment_id, interval, health_check_url,
+			   (select status from healthcheck where service_id = services.id order by id desc limit 1) as status,
+			   get_uptime(services.id) as uptime
+				from services where environment_id = $1;`
 
 	svcRows, er := e.DB.QueryContext(ctx, svcQuery, id)
 	if er != nil {
@@ -115,9 +110,8 @@ func (e EnvironmentModel) GetWithoutServices(id int64) (*GetEnvironmentWithoutSe
 	if id < 1 {
 		return nil, ErrRecordNotFound
 	}
-	envQuery := `SELECT id, created_at, title, description, version
-				FROM environments
-				WHERE id = $1`
+
+	envQuery := `select id, created_at, title, description, version from environments where id = $1`
 
 	var env GetEnvironmentWithoutServicesQueryResult
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -144,10 +138,8 @@ func (e EnvironmentModel) GetWithoutServices(id int64) (*GetEnvironmentWithoutSe
 }
 
 func (e EnvironmentModel) Update(env *Environment) error {
-	query := `  UPDATE environments
-				SET title = $1, description = $2, version = version + 1
-				WHERE id = $3 AND version = $4
-				RETURNING version`
+	query := `  update environments set title = $1, description = $2, version = version + 1
+				where id = $3 and version = $4 returning version`
 
 	args := []interface{}{
 		env.Title,
@@ -176,7 +168,7 @@ func (e EnvironmentModel) Delete(id int64) error {
 		return ErrRecordNotFound
 	}
 
-	query := `DELETE FROM environments WHERE id = $1`
+	query := `delete from environments where id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -199,12 +191,10 @@ func (e EnvironmentModel) Delete(id int64) error {
 }
 
 func (e EnvironmentModel) GetAll(title string, description string, filters Filters) ([]*GetAllEnvironmentsQueryResult, Metadata, error) {
-	query := fmt.Sprintf(`SELECT count(*) OVER(), id, created_at, title, description
-								FROM environments
-								WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
-								AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $2) OR $2 = '')
-								ORDER BY %s %s, id ASC
-								LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
+	query := fmt.Sprintf(`select count(*) over(), id, created_at, title, description from environments
+								where (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) or $1 = '')
+								and (to_tsvector('simple', description) @@ plainto_tsquery('simple', $2) or $2 = '')
+								order by %s %s, id asc limit $3 offset $4`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

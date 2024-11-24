@@ -12,7 +12,7 @@ create table if not exists services (
     title varchar(250) not null,
     description text null,
     health_check_url text not null,
-    interval bigint not null, -- TODO: add default value of 3 seconds
+    interval bigint not null,
     version integer not null default 1,
     created_at timestamp(0) with time zone not null default now()
 );
@@ -89,6 +89,14 @@ $$ language plpgsql;
 
 
 
+/*
+This view is represent of outages. actually it fetch all outages from 'healthcheck' table
+and spans these rows on days. for example suppose we have a downtime in table healthcheck
+between 2024-10-5 to 2024-10-8. this lag in following function generates 3 rows like this:
+1. 2024-10-5 to 2024-10-6
+2. 2024-10-6 to 2024-10-7
+3. 2024-10-7 to 2024-10-8
+*/
 create or replace view outages_90days_view as (
 with healthcheck_filtered as (
   select id, service_id, status, start_time, coalesce(end_time, now()) as end_time

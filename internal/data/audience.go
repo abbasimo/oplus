@@ -276,10 +276,8 @@ func (a AudienceModel) MapContactToAudience(audienceID int64, contactID int64) e
 
 func (a AudienceModel) GetByRuleID(ruleID int64) ([]*Audience, error) {
 	// todo: i think i need contact too!
-	query := `select a.id, a.title, a.description, a.version, a.created_at
-				from audiences a 
-				left join public.rules_audiences ra on a.id = ra.audience_id
-				where ra.rule_id = $1`
+	query := `select a.id, a.title, a.description, a.version, a.created_at from audiences a 
+				left join public.rules_audiences ra on a.id = ra.audience_id where ra.rule_id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

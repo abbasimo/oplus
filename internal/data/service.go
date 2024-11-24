@@ -22,31 +22,6 @@ type Service struct {
 	Status         ServiceStatus `json:"status"`
 }
 
-type GetServiceQueryResult struct {
-	ID             int64         `json:"id"`
-	EnvironmentID  int64         `json:"environment_id"`
-	Title          string        `json:"title"`
-	Description    string        `json:"description"`
-	Uptime         int64         `json:"uptime"` // todo: can delete this property?!
-	HealthCheckUrl string        `json:"health_check_url"`
-	Interval       int           `json:"interval"`
-	CreatedAt      time.Time     `json:"created_at"`
-	Version        int           `json:"-"`
-	Status         ServiceStatus `json:"status"`
-}
-
-type GetOutagesQueryResult struct {
-	Date    time.Time           `json:"date"`
-	Outages []OutageQueryResult `json:"outages"`
-}
-
-type OutageQueryResult struct {
-	StartTime        time.Time `json:"start_time"`
-	EndTime          time.Time `json:"end_time"`
-	Text             string    `json:"text"`
-	DowntimeDuration int       `json:"downtime_duration"`
-}
-
 type ServiceStatus string
 
 const (
@@ -100,8 +75,7 @@ func (s ServiceModel) Get(envID int64, svcID int64) (*GetServiceQueryResult, err
 					   interval, health_check_url,
 					   (select status from healthcheck where service_id = $1 order by id desc limit 1) as status,
 					   get_uptime(id) as uptime
-				from services
-				where id = $1 and environment_id = $2;`
+				from services where id = $1 and environment_id = $2;`
 
 	var svc GetServiceQueryResult
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -137,8 +111,7 @@ func (s ServiceModel) GetOutages(envID int64, svcID int64) (*[]GetOutagesQueryRe
 	}
 
 	query := `select day, segment_start_time, segment_end_time, downtime_seconds
-    			from outages_90days_view
-    			where service_id = $1;`
+    		  from outages_90days_view where service_id = $1;`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -165,7 +138,6 @@ func (s ServiceModel) GetOutages(envID int64, svcID int64) (*[]GetOutagesQueryRe
 			return nil, err
 		}
 
-		// Create OutageQueryResult
 		outage := OutageQueryResult{
 			StartTime:        startTime,
 			EndTime:          endTime,
@@ -173,16 +145,13 @@ func (s ServiceModel) GetOutages(envID int64, svcID int64) (*[]GetOutagesQueryRe
 			DowntimeDuration: int(downtimeSeconds),
 		}
 
-		// Append to the map
 		outageMap[day] = append(outageMap[day], outage)
 	}
 
-	// Check for any row errors
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	// Convert map to list of GetOutagesQueryResult
 	var results []GetOutagesQueryResult
 	for date, outages := range outageMap {
 		results = append(results, GetOutagesQueryResult{
@@ -195,10 +164,8 @@ func (s ServiceModel) GetOutages(envID int64, svcID int64) (*[]GetOutagesQueryRe
 }
 
 func (s ServiceModel) Update(svc *Service) error {
-	query := `  UPDATE services
-				SET title = $1, description = $2, health_check_url = $3, interval = $4, version = version + 1
-				WHERE id = $5 AND version = $6
-				RETURNING version`
+	query := `  update services set title = $1, description = $2, health_check_url = $3, interval = $4, version = version + 1
+				where id = $5 and version = $6 returning version`
 
 	args := []interface{}{
 		svc.Title,
@@ -229,7 +196,7 @@ func (s ServiceModel) Delete(envID int64, svcID int64) error {
 		return ErrRecordNotFound
 	}
 
-	query := `DELETE FROM services WHERE environment_id = $1 and id = $2`
+	query := `delete from services where environment_id = $1 and id = $2`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -253,9 +220,7 @@ func (s ServiceModel) Delete(envID int64, svcID int64) error {
 
 func (s ServiceModel) GetAll() (*[]Service, error) {
 
-	query := `	SELECT id, created_at, title, description, version, environment_id, interval, health_check_url
-				FROM services
-				`
+	query := `select id, created_at, title, description, version, environment_id, interval, health_check_url from services`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -288,6 +253,31 @@ func (s ServiceModel) GetAll() (*[]Service, error) {
 		}
 	}
 	return &services, nil
+}
+
+type GetServiceQueryResult struct {
+	ID             int64         `json:"id"`
+	EnvironmentID  int64         `json:"environment_id"`
+	Title          string        `json:"title"`
+	Description    string        `json:"description"`
+	Uptime         int64         `json:"uptime"` // todo: can delete this property?!
+	HealthCheckUrl string        `json:"health_check_url"`
+	Interval       int           `json:"interval"`
+	CreatedAt      time.Time     `json:"created_at"`
+	Version        int           `json:"-"`
+	Status         ServiceStatus `json:"status"`
+}
+
+type GetOutagesQueryResult struct {
+	Date    time.Time           `json:"date"`
+	Outages []OutageQueryResult `json:"outages"`
+}
+
+type OutageQueryResult struct {
+	StartTime        time.Time `json:"start_time"`
+	EndTime          time.Time `json:"end_time"`
+	Text             string    `json:"text"`
+	DowntimeDuration int       `json:"downtime_duration"`
 }
 
 type ServiceStateChangedEvent struct {
