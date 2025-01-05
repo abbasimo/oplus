@@ -41,4 +41,4 @@ jobs:
       # Run the Docker container
       - name: Run Docker Container
         run: |
-          docker run -d --name my-golang-container -p 8080:4000 my-golang-project:latest
+          docker run -d --name my-golang-container -p 8080:4000 -e OPLUS_DB_DSN=postgres://oplus:password@localhost/oplus?sslmode=disable my-golang-project:latest
