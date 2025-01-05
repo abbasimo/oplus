@@ -1,18 +1,18 @@
-name: Build Docker Image
+name: Build and Run Docker Container
 
 on:
   push:
     branches:
-      - add-cicd-piepline
+      - main
   pull_request:
     branches:
-      - master
-  workflow_dispatch:
+      - main
+  workflow_dispatch: # Allows manual triggering of the workflow
 
 jobs:
-  build-docker:
+  build-and-run:
     runs-on: self-hosted
-    name: Build Docker Image
+    name: Build and Run Docker Container
     steps:
       # Checkout the repository
       - name: Checkout code
@@ -30,8 +30,15 @@ jobs:
         run: |
           docker build -t my-golang-project:latest .
 
-      # Push the Docker image
-      - name: Push Docker Image
+      # Stop and remove existing container if it exists
+      - name: Stop and Remove Existing Container
         run: |
-          docker tag my-golang-project:latest mujan/my-golang-project:latest
-          docker push mujan/my-golang-project:latest
+          if [ "$(docker ps -aq -f name=my-golang-container)" ]; then
+            docker stop my-golang-container
+            docker rm my-golang-container
+          fi
+
+      # Run the Docker container
+      - name: Run Docker Container
+        run: |
+          docker run -d --name my-golang-container -p 8080:8080 my-golang-project:latest
