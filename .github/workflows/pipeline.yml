@@ -41,4 +41,4 @@ jobs:
       # Run the Docker container
       - name: Run Docker Container
         run: |
-          docker run -d --name my-golang-container -p 8080:8080 my-golang-project:latest
+          docker run -d --name my-golang-container -p 8080:4000 my-golang-project:latest
