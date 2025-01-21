@@ -25,30 +25,30 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/envs/:id", app.updateEnvironmentHandler)  // checked
 	router.HandlerFunc(http.MethodDelete, "/envs/:id", app.deleteEnvironmentHandler) // checked
 
-	router.HandlerFunc(http.MethodPost, "/envs/:id/services", app.createServiceHandler)                  // not-checked
-	router.HandlerFunc(http.MethodGet, "/envs/:id/services/:sid", app.showServiceHandler)                // not-checked
-	router.HandlerFunc(http.MethodGet, "/envs/:id/services/:sid/outages", app.showServiceOutagesHandler) // not-checked
-	router.HandlerFunc(http.MethodPatch, "/envs/:id/services/:sid", app.updateServiceHandler)            // not-checked
-	router.HandlerFunc(http.MethodDelete, "/envs/:id/services/:sid", app.deleteServiceHandler)           // not-checked
+	router.HandlerFunc(http.MethodPost, "/envs/:id/services", app.createServiceHandler)                  // checked
+	router.HandlerFunc(http.MethodGet, "/envs/:id/services/:sid", app.showServiceHandler)                // checked
+	router.HandlerFunc(http.MethodGet, "/envs/:id/services/:sid/outages", app.showServiceOutagesHandler) // checked
+	router.HandlerFunc(http.MethodPatch, "/envs/:id/services/:sid", app.updateServiceHandler)            // checked
+	router.HandlerFunc(http.MethodDelete, "/envs/:id/services/:sid", app.deleteServiceHandler)           // checked
 
-	router.HandlerFunc(http.MethodPost, "/audiences", app.createAudienceHandler)                            // not-checked
-	router.HandlerFunc(http.MethodGet, "/audiences", app.listAudienceHandler)                               // not-checked
-	router.HandlerFunc(http.MethodGet, "/audiences/:id", app.showAudienceHandler)                           // not-checked
-	router.HandlerFunc(http.MethodPatch, "/audiences/:id", app.updateAudienceHandler)                       // not-checked
-	router.HandlerFunc(http.MethodDelete, "/audiences/:id", app.deleteAudienceHandler)                      // not-checked
-	router.HandlerFunc(http.MethodPut, "/audiences/:id/contacts/:cid", app.mappingContactToAudienceHandler) // not-checked
+	router.HandlerFunc(http.MethodPost, "/audiences", app.createAudienceHandler)                            // checked
+	router.HandlerFunc(http.MethodGet, "/audiences", app.listAudienceHandler)                               // checked
+	router.HandlerFunc(http.MethodGet, "/audiences/:id", app.showAudienceHandler)                           // checked
+	router.HandlerFunc(http.MethodPatch, "/audiences/:id", app.updateAudienceHandler)                       // checked
+	router.HandlerFunc(http.MethodDelete, "/audiences/:id", app.deleteAudienceHandler)                      // checked
+	router.HandlerFunc(http.MethodPut, "/audiences/:id/contacts/:cid", app.mappingContactToAudienceHandler) // checked
 
-	router.HandlerFunc(http.MethodPost, "/contacts", app.createContactHandler)       // not-checked
-	router.HandlerFunc(http.MethodGet, "/contacts", app.listContactHandler)          // not-checked
-	router.HandlerFunc(http.MethodGet, "/contacts/:id", app.showContactHandler)      // not-checked
-	router.HandlerFunc(http.MethodPatch, "/contacts/:id", app.updateContactHandler)  // not-checked
-	router.HandlerFunc(http.MethodDelete, "/contacts/:id", app.deleteContactHandler) // not-checked
+	router.HandlerFunc(http.MethodPost, "/contacts", app.createContactHandler)       // checked
+	router.HandlerFunc(http.MethodGet, "/contacts", app.listContactHandler)          // checked
+	router.HandlerFunc(http.MethodGet, "/contacts/:id", app.showContactHandler)      // checked
+	router.HandlerFunc(http.MethodPatch, "/contacts/:id", app.updateContactHandler)  // checked
+	router.HandlerFunc(http.MethodDelete, "/contacts/:id", app.deleteContactHandler) // checked
 
-	router.HandlerFunc(http.MethodPost, "/rules", app.createRuleHandler)       // not-checked
-	router.HandlerFunc(http.MethodGet, "/rules", app.listRuleHandler)          // not-checked
-	router.HandlerFunc(http.MethodGet, "/rules/:id", app.showRuleHandler)      // not-checked
-	router.HandlerFunc(http.MethodPatch, "/rules/:id", app.updateRuleHandler)  // not-checked
-	router.HandlerFunc(http.MethodDelete, "/rules/:id", app.deleteRuleHandler) // not-checked
+	router.HandlerFunc(http.MethodPost, "/rules", app.createRuleHandler)       // checked
+	router.HandlerFunc(http.MethodGet, "/rules", app.listRuleHandler)          // checked
+	router.HandlerFunc(http.MethodGet, "/rules/:id", app.showRuleHandler)      // checked
+	router.HandlerFunc(http.MethodPatch, "/rules/:id", app.updateRuleHandler)  // checked
+	router.HandlerFunc(http.MethodDelete, "/rules/:id", app.deleteRuleHandler) // checked
 
 	return router
 }

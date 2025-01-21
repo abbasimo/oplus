@@ -1,0 +1,32 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: oplus
+    ports:
+      - "4000:4000"
+    environment:
+      - OPLUS_DB_DSN=postgres://oplus:password@postgres_db/oplus?sslmode=disable
+    depends_on:
+      - postgres_db
+
+  postgres_db:
+    image: postgres
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: oplus
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: oplus
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+
+
+#sudo docker run --name postgres_oplus -e POSTGRES_USER=oplus -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
