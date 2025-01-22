@@ -1,0 +1,64 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@components": ["src/components"],
+      "@styles/*": ["src/styles/*"],
+      "@styles": ["src/styles"],
+      "@configs/*": ["src/configs/*"],
+      "@configs": ["src/configs"],
+      "@store/*": ["src/store/*"],
+      "@store": ["src/store"],
+      "@layouts/*": ["src/theme-layouts/*"],
+      "@layouts": ["src/theme-layouts"],
+      "@exception/*": ["src/exception/*"],
+      "@exception": ["src/exception"],
+      "@contexts/*": ["src/contexts/*"],
+      "@contexts": ["src/contexts"],
+      "@main/*": ["src/main/*"],
+      "@main": ["src/main"],
+      "@api/*": ["src/api/*"],
+      "@api": ["src/api"],
+      "@auth/*": ["src/auth/*"],
+      "@auth": ["src/auth"],
+      "@i18n/*": ["src/i18n/*"],
+      "@i18n": ["src/i18n"]
+    },
+    "declaration": false,
+    "sourceMap": false,
+    "target": "esnext",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2020",
+      "scripthost"
+    ],
+    "plugins": [{ "name": "typescript-plugin-css-modules" }],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "es2022",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "jsx": "react-jsx"
+  },
+  "exclude": [
+    "node_modules",
+    "node-scripts"
+  ],
+  "include": [
+    "src",
+    "tailwind.config.cjs",
+    "vite.config.mts",
+    "vite-env.d.ts"
+  ],
+}
