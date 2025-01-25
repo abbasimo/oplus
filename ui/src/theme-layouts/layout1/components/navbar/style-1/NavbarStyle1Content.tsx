@@ -1,7 +1,7 @@
 import { memo } from 'react';
-import NavbarToggleButton from '@layouts/shared-components/navbar/NavbarToggleButton';
 import Navigation from '@layouts/shared-components/Navigation';
-import { Divider } from '@mui/material';
+import UserMenu from '@layouts/shared-components/UserMenu';
+import { Divider, Grid2 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import clsx from 'clsx';
 
@@ -49,7 +49,7 @@ function NavbarStyle1Content(props: NavbarStyle1ContentProps) {
 					<Logo />
 				</div>
 
-				<NavbarToggleButton className="h-40 w-40 p-0" />
+				{/* <NavbarToggleButton className="h-40 w-40 p-0" /> */}
 			</div>
 
 			<StyledContent className="flex min-h-0 flex-1 flex-col">
@@ -62,13 +62,21 @@ function NavbarStyle1Content(props: NavbarStyle1ContentProps) {
 
 				<Navigation layout="vertical" />
 
-				<div className="flex-0 flex items-center justify-center py-48 opacity-10">
-					<img
-						className="w-full max-w-92 select-none"
-						src="assets/images/logo/logo.png"
-						alt="footer logo"
-					/>
-				</div>
+				<Grid2
+					container
+					className="pt-48 pb-92"
+					spacing={5}
+				>
+					<Grid2 size={12}>
+						<Divider
+							flexItem
+							variant="middle"
+						/>
+					</Grid2>
+					<Grid2 className="pr-24">
+						<UserMenu />
+					</Grid2>
+				</Grid2>
 			</StyledContent>
 		</Root>
 	);

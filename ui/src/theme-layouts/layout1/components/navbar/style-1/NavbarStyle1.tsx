@@ -17,7 +17,6 @@ type StyledNavBarProps = {
 };
 
 const StyledNavBar = styled('div')<StyledNavBarProps>(({ theme, open, position }) => ({
-	...theme.mixins.borderRight(1),
 	minWidth: navbarWidth,
 	width: navbarWidth,
 	maxWidth: navbarWidth,
@@ -62,7 +61,7 @@ function NavbarStyle1({ config }: NavbarStyle1Props) {
 
 	return (
 		<>
-			<Hidden lgDown>
+			<Hidden mdDown>
 				<StyledNavBar
 					className="sticky top-0 z-20 h-screen flex-auto shrink-0 flex-col overflow-hidden"
 					open={navbar.open}
@@ -72,7 +71,7 @@ function NavbarStyle1({ config }: NavbarStyle1Props) {
 				</StyledNavBar>
 			</Hidden>
 
-			<Hidden lgUp>
+			<Hidden mdUp>
 				<StyledNavBarMobile
 					classes={{
 						paper: 'flex-col flex-auto h-full'
