@@ -50,7 +50,7 @@ func (app *application) pingService(svcUrl string) (bool, error) {
 		Timeout: time.Second * 2, // todo: is it better to give from config?! idk!
 	}
 
-	req, err := http.NewRequest(http.MethodHead, svcUrl, nil)
+	req, err := http.NewRequest(http.MethodGet, svcUrl, nil)
 	if err != nil {
 		return false, ErrRequestFailed
 	}
