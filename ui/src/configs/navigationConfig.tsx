@@ -1,4 +1,6 @@
-import { RiFileSettingsFill, RiQuestionAnswerFill } from 'react-icons/ri';
+import DashboardIcon from '@assets/images/dashboard.svg?react';
+import ManageEventsIcon from '@assets/images/manage-events.svg?react';
+import ServiceHealthIcon from '@assets/images/service-health.svg?react';
 import i18n from '@i18n';
 import { NavItemType } from '@layouts/shared-components/navigation/types/NavItemType';
 
@@ -18,7 +20,7 @@ const navigationConfig: NavItemType[] = [
 		id: 'dashboard',
 		title: 'DASHBOARD',
 		type: 'item',
-		icon: <RiQuestionAnswerFill />,
+		icon: <DashboardIcon />,
 		url: '/example',
 		auth: authPrivileges.user
 	},
@@ -26,7 +28,7 @@ const navigationConfig: NavItemType[] = [
 		id: 'service-helth',
 		title: 'SERVICE_HEALTH',
 		type: 'item',
-		icon: <RiQuestionAnswerFill />,
+		icon: <ServiceHealthIcon />,
 		url: '/service-health',
 		auth: authPrivileges.user
 	},
@@ -34,7 +36,7 @@ const navigationConfig: NavItemType[] = [
 		id: 'manage-events',
 		title: 'MANAGE_EVENTS',
 		type: 'item',
-		icon: <RiFileSettingsFill />,
+		icon: <ManageEventsIcon />,
 		url: '/manage-events',
 		auth: authPrivileges.user
 	}

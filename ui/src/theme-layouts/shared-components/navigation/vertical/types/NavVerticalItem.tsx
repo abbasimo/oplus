@@ -92,7 +92,7 @@ function NavVerticalItem(props: NavItemComponentProps) {
 				{isValidElement(item.icon) &&
 					cloneElement(item.icon, {
 						fontSize: item.icon.props.fontSize ?? 25,
-						className: clsx('remate-list-item-icon shrink-0', item.icon.props.className)
+						className: clsx('remate-list-item-icon shrink-0 w-28 h-28', item.icon.props.className)
 					})}
 
 				<ListItemText

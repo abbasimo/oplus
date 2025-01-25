@@ -37,28 +37,10 @@ function UserMenu() {
 	return (
 		<>
 			<Button
-				className="min-h-40 min-w-40 p-0 md:px-16 md:py-6"
+				className="min-h-40 min-w-40 p-0"
 				onClick={userMenuClick}
 				color="inherit"
 			>
-				<div className="mx-4 hidden flex-col items-end md:flex">
-					<Typography
-						variant="body2"
-						component="span"
-						className="flex font-semibold"
-					>
-						{user.data.displayName}
-					</Typography>
-					<Typography
-						variant="caption1"
-						className="capitalize"
-						color="text.secondary"
-					>
-						{user.role?.toString()}
-						{(!user.role || (Array.isArray(user.role) && user.role.length === 0)) && 'Guest'}
-					</Typography>
-				</div>
-
 				{user.data.photoURL ? (
 					<Avatar
 						sx={{
@@ -80,6 +62,24 @@ function UserMenu() {
 						{user?.data?.displayName?.[0]}
 					</Avatar>
 				)}
+
+				<div className="mx-4 hidden flex-col items-start md:flex">
+					<Typography
+						variant="body2"
+						component="span"
+						className="flex font-semibold"
+					>
+						{user.data.displayName}
+					</Typography>
+					<Typography
+						variant="caption1"
+						className="capitalize"
+						color="text.secondary"
+					>
+						{user.role?.toString()}
+						{(!user.role || (Array.isArray(user.role) && user.role.length === 0)) && 'Guest'}
+					</Typography>
+				</div>
 			</Button>
 
 			<Popover

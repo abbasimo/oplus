@@ -21,7 +21,7 @@ interface NavbarWrapperLayout1Props {
 function NavbarWrapperLayout1({ config }: NavbarWrapperLayout1Props) {
 	const navbar = useAppSelector(selectNavbar);
 	const location = useLocation();
-	const isMobile = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+	const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
 	const { pathname } = location;
 	const dispatch = useAppDispatch();
 

@@ -1,7 +1,8 @@
 import React, { memo, ReactNode } from 'react';
 import { ErrorBoundary } from '@exception/components';
 import Suspense from '@layouts/shared-components/Suspense';
-import { styled } from '@mui/material/styles';
+import { Box, Hidden } from '@mui/material';
+import { styled, Theme } from '@mui/material/styles';
 import _ from 'lodash';
 
 import FooterLayout1 from './components/FooterLayout1';
@@ -16,7 +17,8 @@ type Layout1Props = {
 	config?: Layout1ConfigType;
 };
 
-const Root = styled('div')(({ config }: { config: Layout1ConfigType }) => ({
+const Root = styled('div')(({ config, theme }: { config: Layout1ConfigType; theme?: Theme }) => ({
+	backgroundColor: theme?.palette?.grey?.[300],
 	...(config.mode === 'boxed' && {
 		clipPath: 'inset(0)',
 		maxWidth: `${config.containerWidth}px`,
@@ -51,15 +53,25 @@ function Layout1({ children, config: configFromProps }: Layout1Props) {
 					<NavbarWrapperLayout1 config={config} />
 				)}
 
-				<main
+				<Box
+					component="main"
+					sx={(theme) => ({
+						borderTopLeftRadius: theme.shape.borderRadius * 2,
+						borderBottomLeftRadius: theme.shape.borderRadius * 2,
+						overflow: 'hidden',
+						backgroundColor: theme.palette.background.default,
+						...theme.mixins.border(1)
+					})}
 					id="remate-main"
 					className="relative z-10 flex min-h-full min-w-0 flex-auto flex-col"
 				>
 					{config?.toolbar?.display && (
-						<ToolbarLayout1
-							config={config}
-							className={config.toolbar.style === 'fixed' ? 'sticky top-0' : ''}
-						/>
+						<Hidden mdUp>
+							<ToolbarLayout1
+								config={config}
+								className={config.toolbar.style === 'fixed' ? 'sticky top-0' : ''}
+							/>
+						</Hidden>
 					)}
 
 					<div className="relative z-10 flex min-h-0 flex-auto flex-col">
@@ -71,7 +83,7 @@ function Layout1({ children, config: configFromProps }: Layout1Props) {
 					{config?.footer?.display && (
 						<FooterLayout1 className={config.footer.style === 'fixed' ? 'sticky bottom-0' : ''} />
 					)}
-				</main>
+				</Box>
 
 				{config?.navbar?.display && config.navbar.position === 'right' && (
 					<NavbarWrapperLayout1 config={config} />
