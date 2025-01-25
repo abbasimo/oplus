@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { authPrivileges } from '@auth';
+import DataTable from '@components/dataTable';
 import PageSimple from '@components/pageSimple';
 import { Button, Divider, Grid2, MenuItem, Typography } from '@mui/material';
 import {
@@ -40,7 +41,35 @@ function Example() {
 				</div>
 			}
 			content={
-				<div className="w-full p-24">
+				<div
+					className="w-full p-24"
+					style={{ direction: 'rtl' }}
+				>
+					<DataTable
+						// enableTopToolbar={false}
+						// enableBottomToolbar={false}
+						data={new Array(1000).fill({
+							test: 'تایتل تستی',
+							test2: 'تایتل تستی',
+							test3: 'تایتل تستی',
+							test4: 'تایتل تستی',
+							test5: 'تایتل تستی',
+							test6: 'تایتل تستی',
+							test7: 'تایتل تستی تایتل تستی تایتل تستی تایتل تستی تایتل تستی تایتل تستی',
+							test8: 'تایتل تستی تایتل تستی تایتل تستی تایتل تستی تایتل تستی تایتل تستی',
+							ip: '192.168.0.1'
+						})}
+						columns={[
+							{ header: 'test', accessorKey: 'test' },
+							{ header: 'test', accessorKey: 'test2' },
+							{ header: 'test', accessorKey: 'test3' }
+							// { header: 'test', accessorKey: 'test4' },
+							// { header: 'test', accessorKey: 'test6' },
+							// { header: 'test', accessorKey: 'test7' },
+							// { header: 'test', accessorKey: 'test8' },
+							// { header: 'ip address', accessorKey: 'ip' }
+						]}
+					/>
 					<RHFForm
 						methods={methods}
 						// eslint-disable-next-line no-console
