@@ -55,7 +55,8 @@ export function extendThemeWithMixins(themeOptions: ThemeOptions) {
 				backgroundColor: theme.palette.action.selected,
 				'&:hover': { backgroundColor: theme.palette.action.hover }
 			},
-			[`&+.${dividerClasses.root}`]: { margin: theme.spacing(0.5, 0) }
+			[`&+.${dividerClasses.root}`]: { margin: theme.spacing(0.5, 0) },
+			fontWeight: theme.typography.fontWeightMedium
 		}
 	};
 }

@@ -95,7 +95,7 @@ const typography: (lang: string) => ThemeOptions['typography'] = (lang) => {
 		},
 
 		button: {
-			fontWeight: 400,
+			fontWeight: 500,
 			lineHeight: pxToRem(28),
 			fontSize: pxToRem(16),
 			textTransform: 'unset'

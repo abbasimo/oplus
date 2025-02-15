@@ -4,16 +4,20 @@ import { MuiComponents } from './types';
 
 const MuiCssBaseline: MuiComponents['MuiCssBaseline'] = {
 	styleOverrides: (theme) => ({
+		mark: {
+			backgroundColor: alpha(theme.palette.warning.main, 0.3),
+			borderRadius: theme.shape.borderRadius / 3
+		},
 		'*, *::before, *::after, body, html': {
 			fontFamily: theme.typography.fontFamily
 		},
 		html: {
 			fontSize: '62.5%',
-			backgroundColor: `${theme.palette.background.default}!important`,
+			backgroundColor: `${theme.palette.background.neutral}!important`,
 			color: `${theme.palette.text.primary}!important`
 		},
 		body: {
-			backgroundColor: theme.palette.background.default,
+			backgroundColor: theme.palette.background.neutral,
 			color: theme.palette.text.primary
 		},
 		'table.simple tbody tr th': {
@@ -65,7 +69,7 @@ const MuiCssBaseline: MuiComponents['MuiCssBaseline'] = {
 		[theme.breakpoints.up('md')]: {
 			'*': {
 				scrollbarWidth: 'thin',
-				scrollbarColor: `${theme.palette.mode === 'dark' ? lighten(theme.palette.background.paper, 0.2) : darken(theme.palette.background.paper, 0.4)} ${theme.palette.background.paper}`
+				scrollbarColor: `${theme.palette.mode === 'dark' ? lighten(theme.palette.background.paper, 0.2) : darken(theme.palette.background.paper, 0.4)} transparent`
 			},
 
 			'::-webkit-scrollbar': {

@@ -1,5 +1,6 @@
 import { chipClasses } from '@mui/material/Chip';
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
+import { alpha } from '@mui/system';
 
 import { MuiComponents } from './types';
 
@@ -43,6 +44,23 @@ const MuiChip: MuiComponents['MuiChip'] = {
 				}
 			};
 		},
+		filled: ({ ownerState, theme }) => {
+			const currentColor = ownerState.color ?? 'default';
+
+			if (currentColor === 'default') {
+				return {
+					color: theme.palette.grey[500],
+					backgroundColor: alpha(theme.palette.grey[500], 0.075),
+					'&:hover': { backgroundColor: alpha(theme.palette.grey[500], 0.16) }
+				};
+			}
+
+			return {
+				color: theme.palette[currentColor].dark,
+				backgroundColor: alpha(theme.palette[currentColor].main, 0.075),
+				'&:hover': { backgroundColor: alpha(theme.palette[currentColor].main, 0.16) }
+			};
+		},
 		label: ({ theme }) => ({ fontWeight: theme.typography.fontWeightMedium }),
 		icon: { color: 'currentColor' },
 		deleteIcon: {
@@ -50,8 +68,8 @@ const MuiChip: MuiComponents['MuiChip'] = {
 			color: 'currentColor',
 			'&:hover': { opacity: 1, color: 'currentColor' }
 		},
-		sizeMedium: ({ theme }) => ({ borderRadius: theme.shape.borderRadius * 1.25 }),
-		sizeSmall: ({ theme }) => ({ borderRadius: theme.shape.borderRadius })
+		sizeMedium: ({ theme }) => ({ borderRadius: theme.shape.borderRadius * 2.75, padding: theme.spacing(1, 2) }),
+		sizeSmall: ({ theme }) => ({ borderRadius: theme.shape.borderRadius * 2 })
 	}
 };
 

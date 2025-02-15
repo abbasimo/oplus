@@ -56,10 +56,10 @@ function Layout1({ children, config: configFromProps }: Layout1Props) {
 				<Box
 					component="main"
 					sx={(theme) => ({
-						borderTopLeftRadius: theme.shape.borderRadius * 2,
-						borderBottomLeftRadius: theme.shape.borderRadius * 2,
-						overflow: 'hidden',
-						backgroundColor: theme.palette.background.default,
+						borderTopLeftRadius: theme.shape.borderRadius * 1.5,
+						borderBottomLeftRadius: theme.shape.borderRadius * 1.5,
+						// overflow: 'hidden',
+						backgroundColor: theme.palette.background.neutral,
 						...theme.mixins.border(1)
 					})}
 					id="remate-main"

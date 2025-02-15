@@ -1,11 +1,11 @@
 import { memo } from 'react';
+import Logo from '@layouts/shared-components/Logo';
+import NavbarToggleButton from '@layouts/shared-components/navbar/NavbarToggleButton';
 import Navigation from '@layouts/shared-components/Navigation';
 import UserMenu from '@layouts/shared-components/UserMenu';
-import { Divider, Grid2 } from '@mui/material';
+import { Divider, Grid2, Hidden } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import clsx from 'clsx';
-
-import Logo from '../../../../shared-components/Logo';
 
 const Root = styled('div')(({ theme }) => ({
 	backgroundColor: theme.palette.grey[300],
@@ -49,7 +49,9 @@ function NavbarStyle1Content(props: NavbarStyle1ContentProps) {
 					<Logo />
 				</div>
 
-				{/* <NavbarToggleButton className="h-40 w-40 p-0" /> */}
+				<Hidden mdUp>
+					<NavbarToggleButton className="h-40 w-40 p-0" />
+				</Hidden>
 			</div>
 
 			<StyledContent className="flex min-h-0 flex-1 flex-col">

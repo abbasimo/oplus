@@ -1,3 +1,4 @@
+import { serviceHealthSlice } from '@main/service-health/store/serviceHealthSlice';
 import { combineSlices } from '@reduxjs/toolkit';
 import { i18nSlice } from '@store/slices/i18nSlice';
 import { navigationSlice } from '@store/slices/navigationSlice';
@@ -15,7 +16,8 @@ export const rootReducer = combineSlices(
 	 */
 	i18nSlice,
 	navigationSlice,
-	navbarSlice
+	navbarSlice,
+	serviceHealthSlice
 	/**
 	 * Dynamic slices
 	 */
