@@ -1,5 +1,3 @@
-import createCache from '@emotion/cache';
-import { CacheProvider } from '@emotion/react';
 import { useAppSelector } from '@store/hooks';
 import { selectCurrentLanguageId } from '@store/slices/i18nSlice';
 import { MaterialReactTable, MaterialReactTableProps, MRT_RowData, useMaterialReactTable } from 'material-react-table';
@@ -14,11 +12,6 @@ function getLocalization(languageId: string) {
 	return MRT_Localization_EN;
 }
 
-const cache = createCache({
-	key: 'mrt',
-	prepend: true
-});
-
 function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TData>) {
 	const currentLanguageId = useAppSelector(selectCurrentLanguageId);
 	const { columns, data, ...rest } = props;
@@ -26,6 +19,7 @@ function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TDa
 	const table = useMaterialReactTable<TData>({
 		columns: columns!,
 		data: data!,
+		columnFilterDisplayMode: 'popover',
 		enableKeyboardShortcuts: false,
 		enableColumnActions: false,
 		enableFilterMatchHighlighting: true,
@@ -37,29 +31,47 @@ function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TDa
 		enableBatchRowSelection: false,
 		enableSelectAll: false,
 		enableSubRowSelection: false,
-		enableColumnResizing: true,
-		enableColumnOrdering: true,
+		enableColumnOrdering: false,
 		enableToolbarInternalActions: false,
-		enableRowNumbers: true,
-		layoutMode: 'grid',
+		enableRowNumbers: false,
 
 		muiTableProps: {
 			sx: {
 				'& .Mui-TableHeadCell-ResizeHandle-Divider': {
 					borderWidth: 3,
 					borderColor: 'transparent'
+				},
+				'& .MuiTableCell-root[data-pinned="true"]': {
+					overflow: 'visible',
+					'&::after': {
+						content: '" "',
+						width: '1px',
+						height: '50%',
+						backgroundColor: 'divider',
+						position: 'absolute',
+						top: '50%',
+						left: -1,
+						transform: 'translateY(-50%)'
+					}
+				},
+				'& .MuiTableCell-root[data-pinned="true"]::before': {
+					boxShadow: 'none',
+					backgroundColor: 'unset'
 				}
 			}
 		},
 
 		muiTableBodyCellProps: {
-			align: 'center'
+			align: 'left',
+			sx: {
+				padding: 1.5
+			}
 		},
 		muiTableFooterCellProps: {
-			align: 'center'
+			align: 'left'
 		},
 		muiTableHeadCellProps: {
-			align: 'center'
+			align: 'left'
 		},
 
 		muiTableBodyRowProps: {
@@ -69,13 +81,33 @@ function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TDa
 		muiTableHeadProps: {
 			sx: (theme) => ({
 				'& .MuiTableCell-root.MuiTableCell-head, & .MuiTableCell-root[data-pinned="true"]::before': {
-					backgroundColor: theme.palette.background.default
+					backgroundColor: theme.palette.background.default,
+					fontWeight: 400,
+					padding: theme.spacing(1.75, 1.5)
+				},
+				'& .Mui-TableHeadCell-Content-Labels': {
+					flexDirection: 'row'
 				},
 				'& .MuiTableCell-root.MuiTableCell-head > .Mui-TableHeadCell-Content': {
-					justifyContent: 'center'
+					flexDirection: 'row',
+					'& .MuiIconButton-root': {
+						width: 'auto',
+						height: 'auto',
+						padding: 0
+					}
 				},
 				'& th:not(:last-of-type)': {
-					...theme.mixins.borderLeft(1)
+					position: 'relative',
+					'&::after': {
+						content: '" "',
+						width: '1px',
+						height: '50%',
+						backgroundColor: 'divider',
+						position: 'absolute',
+						top: '50%',
+						right: 0,
+						transform: 'translateY(-50%)'
+					}
 				},
 				'& th:last-of-type .Mui-TableHeadCell-ResizeHandle-Wrapper': {
 					display: 'none'
@@ -92,20 +124,30 @@ function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TDa
 
 		muiTableBodyProps: {
 			sx: (theme) => ({
-				'& tr:nth-of-type(odd):not([data-selected="true"]):not([data-pinned="true"]) > td': {
+				'& tr:nth-of-type(odd):not([data-selected="true"]) > td': {
 					backgroundColor: theme.palette.background.paper
 				},
-				'& tr:nth-of-type(even):not([data-selected="true"]):not([data-pinned="true"]) > td': {
+				'& tr:nth-of-type(even):not([data-selected="true"]) > td': {
 					backgroundColor: theme.palette.background.default
 				},
-				'& tr:not(:last-of-type):not([data-selected="true"]):not([data-pinned="true"]) > td': {
+				'& tr:not(:last-of-type):not([data-selected="true"]) > td': {
 					...theme.mixins.borderBottom(1)
 				},
 				'& tr:last-of-type > td': {
 					borderBottom: 0
 				},
 				'& tr td:not(:last-of-type)': {
-					...theme.mixins.borderLeft(1)
+					position: 'relative',
+					'&::after': {
+						content: '" "',
+						width: '1px',
+						height: '50%',
+						backgroundColor: 'divider',
+						position: 'absolute',
+						top: '50%',
+						right: 0,
+						transform: 'translateY(-50%)'
+					}
 				}
 			})
 		},
@@ -115,19 +157,12 @@ function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TDa
 				minHeight: 64,
 				'&>.MuiBox-root': {
 					paddingTop: 1.5,
-					paddingRight: 1,
 					width: 'auto'
 				},
 				'& .MuiTextField-root': {
-					'& .MuiInputAdornment-root.MuiInputAdornment-positionEnd': {
-						marginRight: 1,
-						marginLeft: -0.5
-					},
 					'& .MuiOutlinedInput-root>svg': {
-						marginLeft: 0.75,
 						color: theme.palette.text.secondary,
-						fill: theme.palette.text.secondary,
-						marginRight: 'unset !important'
+						fill: theme.palette.text.secondary
 					}
 				}
 			})
@@ -144,11 +179,9 @@ function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TDa
 
 				'& .MuiTablePagination-root': {
 					width: '100%',
-					'& .MuiSelect-select': {
-						direction: 'ltr'
-					},
+
 					'& .MuiSelect-icon': {
-						right: 0
+						right: 4
 					}
 				}
 			})
@@ -159,7 +192,7 @@ function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TDa
 		},
 
 		initialState: {
-			density: 'compact',
+			density: 'comfortable',
 			showGlobalFilter: true,
 			...rest?.initialState
 		},
@@ -167,11 +200,7 @@ function DataTable<TData extends MRT_RowData>(props: MaterialReactTableProps<TDa
 		...rest
 	});
 
-	return (
-		<CacheProvider value={cache}>
-			<MaterialReactTable table={table} />
-		</CacheProvider>
-	);
+	return <MaterialReactTable table={table} />;
 }
 
 export default DataTable;

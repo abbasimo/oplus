@@ -8,14 +8,14 @@ const MuiTab: MuiComponents['MuiTab'] = {
 	styleOverrides: {
 		root: ({ theme }) => ({
 			opacity: 1,
-			minWidth: 48,
-			minHeight: 48,
+			minWidth: 92,
+			minHeight: 54,
 			padding: theme.spacing(1, 0),
 			color: theme.palette.text.secondary,
-			fontWeight: theme.typography.fontWeightMedium,
+			fontWeight: theme.typography.fontWeightRegular,
 			lineHeight: theme.typography.body2.lineHeight,
 			[`&.${tabClasses.selected}`]: {
-				color: theme.palette.text.primary,
+				color: theme.palette.primary.main,
 				fontWeight: theme.typography.fontWeightBold
 			}
 		})

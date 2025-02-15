@@ -8,7 +8,7 @@ import { navbarCloseMobile, selectNavbar } from '@store/slices/navbarSlice';
 
 import NavbarStyle1Content from './NavbarStyle1Content';
 
-const navbarWidth = 280;
+const navbarWidth = 260;
 
 type StyledNavBarProps = {
 	theme?: Theme;

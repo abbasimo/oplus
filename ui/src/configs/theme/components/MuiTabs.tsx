@@ -2,7 +2,6 @@ import { MuiComponents } from './types';
 
 const MuiTabs: MuiComponents['MuiTabs'] = {
 	defaultProps: {
-		textColor: 'inherit',
 		variant: 'scrollable',
 		allowScrollButtonsMobile: true
 	},
@@ -16,7 +15,11 @@ const MuiTabs: MuiComponents['MuiTabs'] = {
 				}
 			})
 		}),
-		indicator: { backgroundColor: 'currentColor' }
+		indicator: {
+			height: 4,
+			borderTopRightRadius: 100,
+			borderTopLeftRadius: 100
+		}
 	}
 };
 

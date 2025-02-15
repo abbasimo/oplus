@@ -14,7 +14,7 @@ export const grey = {
 };
 
 export const primary = {
-	main: '#3f359d'
+	main: '#454CC9'
 };
 
 export const secondary = {
@@ -71,11 +71,13 @@ export const text = {
 export const background = {
 	light: {
 		paper: '#fcfcfd',
-		default: '#f3f3f7'
+		default: '#f3f3f7',
+		neutral: '#EBEBF2'
 	},
 	dark: {
 		paper: grey[800],
-		default: grey[900]
+		default: grey[900],
+		neutral: grey[900]
 	}
 };
 
@@ -124,3 +126,9 @@ export const palettes: { light: ThemeOptions['palette']; dark: ThemeOptions['pal
 	light: { mode: 'light', ...lightPalette },
 	dark: { mode: 'dark', ...darkPalette }
 };
+
+declare module '@mui/material/styles' {
+	interface TypeBackground {
+		neutral: string;
+	}
+}

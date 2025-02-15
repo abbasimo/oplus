@@ -12,7 +12,7 @@ import typography from './typography';
 export default function generateMuiTheme(colorScheme: PaletteMode, lang: string, direction: 'ltr' | 'rtl') {
 	const theme: ThemeOptions = {
 		direction,
-		shape: { borderRadius: 8 },
+		shape: { borderRadius: 12 },
 		typography: typography(lang),
 		components: components,
 		shadows: shadows(),

@@ -63,7 +63,7 @@ function UserMenu() {
 					</Avatar>
 				)}
 
-				<div className="mx-4 hidden flex-col items-start md:flex">
+				<div className="mx-4 flex-col items-start flex">
 					<Typography
 						variant="body2"
 						component="span"

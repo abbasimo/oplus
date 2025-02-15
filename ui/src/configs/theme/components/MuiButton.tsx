@@ -54,6 +54,9 @@ const MuiButton: MuiComponents['MuiButton'] = {
 				ownerState?.color === 'inherit' ? theme.palette.text.primary : theme.palette[ownerState.color!].main;
 
 			return {
+				borderWidth: 2,
+				borderColor,
+				color,
 				...(ownerState?.color === 'inherit' && {
 					color,
 					borderColor: alpha(borderColor, 0.48),

@@ -12,6 +12,16 @@ const GlobalOverlays = () => {
 				defaultOptions={{
 					fullWidth: true,
 					closeOnBackdropClick: false,
+					transitionPreset: 'grow',
+					transitionDuration: 350,
+					headerProps: {
+						titleTypographyProps: {
+							variant: 'title3'
+						}
+					},
+					contentWrapperProps: {
+						paddingTop: 0.5
+					},
 					contentWrapper: ({ children, ...props }) => (
 						<DefaultModalContentWrapperComponent {...props}>
 							<ErrorBoundary>{children}</ErrorBoundary>

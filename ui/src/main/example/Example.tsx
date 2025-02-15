@@ -46,7 +46,7 @@ function Example() {
 					style={{ direction: 'rtl' }}
 				>
 					<DataTable
-						// enableTopToolbar={false}
+						enableTopToolbar={false}
 						// enableBottomToolbar={false}
 						data={new Array(1000).fill({
 							test: 'تایتل تستی',
