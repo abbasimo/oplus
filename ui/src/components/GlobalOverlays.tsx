@@ -17,10 +17,11 @@ const GlobalOverlays = () => {
 					headerProps: {
 						titleTypographyProps: {
 							variant: 'title3'
-						}
+						},
+						sx: (theme) => ({ ...theme.mixins.borderBottom(1) })
 					},
 					contentWrapperProps: {
-						paddingTop: 0.5
+						paddingTop: 2
 					},
 					contentWrapper: ({ children, ...props }) => (
 						<DefaultModalContentWrapperComponent {...props}>
@@ -30,7 +31,15 @@ const GlobalOverlays = () => {
 				}}
 			/>
 
-			<AlertDialogContainer defaultOptions={{ confirmOkText: t`OK`, confirmCancelText: t`CANCEL` }} />
+			<AlertDialogContainer
+				defaultOptions={{
+					confirmOkText: t`OK`,
+					confirmCancelText: t`CANCEL`,
+					DialogTitleProps: { variant: 'title3' },
+					DialogContentProps: { sx: { typography: 'body2' } },
+					maxWidth: 'xs'
+				}}
+			/>
 		</>
 	);
 };

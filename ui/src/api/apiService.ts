@@ -37,8 +37,8 @@ export const apiService = createApi({
 					ns: 'exceptions'
 				});
 			},
-			successNotification: () => 'The operation was successfully completed!',
-			cancelOnUnmount: true
+			successNotification: () => 'عملیات با موفقیت انجام شد!',
+			cancelOnUnmount: false
 		},
 		infiniteQuery: {
 			throwOnError: true
