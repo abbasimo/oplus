@@ -26,19 +26,11 @@ const MuiCssBaseline: MuiComponents['MuiCssBaseline'] = {
 		'table.simple thead tr th': {
 			borderColor: theme.palette.divider
 		},
-		'a:not([role=button]):not(.MuiButtonBase-root):not(.MuiLink-root)': {
-			color: theme.palette.primary.main,
-			textDecoration: 'underline',
-			'&:hover': {}
-		},
 		'a.link, a:not([role=button])[target=_blank]': {
-			background: alpha(theme.palette.primary.main, 0.2),
-			color: 'inherit',
-			borderBottom: `1px solid ${theme.palette.divider}`,
+			color: theme.palette.primary.main,
 			textDecoration: 'none',
 			'&:hover': {
-				background: alpha(theme.palette.primary.main, 0.3),
-				textDecoration: 'none'
+				textDecoration: 'underline'
 			}
 		},
 		'[class^="border"]': {

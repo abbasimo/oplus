@@ -30,6 +30,7 @@ import {
 import { searchInString } from '@remate/core';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { ApexOptions } from 'apexcharts';
+import { motion } from 'framer-motion';
 
 const ServiceDetails = lazy(() => import('./ServiceDetails'));
 
@@ -71,6 +72,9 @@ const View = () => {
 		>
 			<Grid2 size={{ xs: 12, lg: 'auto' }}>
 				<Paper
+					component={motion.div}
+					initial={{ opacity: 0, y: -12 }}
+					animate={{ opacity: 1, y: 0, transition: { duration: 0.3 } }}
 					variant="outlined"
 					className="w-full min-w-288 p-12 sticky top-16 max-h-[80vh] overflow-auto"
 					sx={{ backgroundColor: 'transparent', borderRadius: 1.5 }}
@@ -260,6 +264,7 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 	const { searchValue, selectedStatus } = useAppSelector(selectServiceHealthViewTabState);
 	const dispatch = useAppDispatch();
 	const { data: envDetails, status } = useEnvDetailsQuery({
+		refetchInterval: 5 * 1000,
 		enabled: !!envId,
 		queryPayload: envId as number
 	});
@@ -287,7 +292,7 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 		return services;
 	}, [envDetails?.services, searchValue, selectedStatus]);
 
-	const handleAlignment = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
+	const handleChangeStatus = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
 		if (newAlignment !== null) {
 			dispatch(
 				setServiceHealthState({
@@ -309,6 +314,10 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 
 	return (
 		<Paper
+			key={envId}
+			component={motion.div}
+			initial={{ opacity: 0, y: 12 }}
+			animate={{ opacity: 1, y: 0, transition: { delay: 0.25, duration: 0.3 } }}
 			sx={{ backgroundColor: 'background.default', borderRadius: 2 }}
 			className="p-16"
 			variant="outlined"
@@ -364,7 +373,7 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 							color="primary"
 							value={selectedStatus}
 							exclusive
-							onChange={handleAlignment}
+							onChange={handleChangeStatus}
 							sx={(theme) => ({
 								backgroundColor: 'grey.300',
 								'& > button': {
@@ -405,17 +414,18 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 							? services.map((item) => (
 									<Grid2
 										key={item.id}
-										size={{ xs: 12, md: 6, lg: 4 }}
+										size={{ xs: 12, md: 6, xl: 4 }}
 									>
-										<Paper className="p-12">
+										<Paper className="p-12 h-[156px]">
 											<Grid2
 												container
-												spacing={1}
-												justifyContent="flex-end"
+												spacing={1.5}
+												flexDirection="column"
+												className="h-full"
+												flexWrap="nowrap"
 											>
 												<Grid2
 													container
-													size={12}
 													spacing={1.5}
 													className="items-center"
 												>
@@ -423,6 +433,12 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 														<Typography
 															variant="body2"
 															fontWeight={500}
+															title={item.title}
+															sx={{
+																whiteSpace: 'nowrap',
+																overflow: 'hidden',
+																textOverflow: 'ellipsis'
+															}}
 														>
 															<Highlighter
 																className=""
@@ -441,20 +457,28 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 															className="px-24"
 														/>
 													</Grid2>
-													<Grid2 size={12}>
-														<Typography
-															variant="caption1"
-															color="textSecondary"
-														>
-															<Highlighter
-																searchWords={[searchValue]}
-																autoEscape={true}
-																textToHighlight={item.description}
-															/>
-														</Typography>
-													</Grid2>
 												</Grid2>
-												<Grid2>
+												<Grid2 size="grow">
+													<Typography
+														variant="caption1"
+														color="textSecondary"
+														title={item.description}
+														sx={{
+															overflow: 'hidden',
+															display: '-webkit-box',
+															WebkitBoxOrient: 'vertical',
+															WebkitLineClamp: 2,
+															lineHeight: 1.5
+														}}
+													>
+														<Highlighter
+															searchWords={[searchValue]}
+															autoEscape={true}
+															textToHighlight={item.description}
+														/>
+													</Typography>
+												</Grid2>
+												<Grid2 alignSelf="flex-end">
 													<Button
 														onClick={() => {
 															pushTab({

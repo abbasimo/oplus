@@ -2,7 +2,9 @@ import React, { memo, ReactNode } from 'react';
 import { ErrorBoundary } from '@exception/components';
 import Suspense from '@layouts/shared-components/Suspense';
 import { Box, Hidden } from '@mui/material';
+import { LinearProgress } from '@mui/material';
 import { styled, Theme } from '@mui/material/styles';
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import _ from 'lodash';
 
 import FooterLayout1 from './components/FooterLayout1';
@@ -39,6 +41,10 @@ const Root = styled('div')(({ config, theme }: { config: Layout1ConfigType; them
  */
 function Layout1({ children, config: configFromProps }: Layout1Props) {
 	const config = React.useMemo(() => _.merge({}, layout1DefaultConfig, configFromProps ?? {}), [configFromProps]);
+	const isFetchingData = useIsFetching();
+	const isMutating = useIsMutating();
+
+	const showLinearLoading = !!isFetchingData || !!isMutating;
 
 	return (
 		<Root
@@ -46,6 +52,10 @@ function Layout1({ children, config: configFromProps }: Layout1Props) {
 			config={config}
 			className="flex w-full"
 		>
+			{showLinearLoading && (
+				<LinearProgress sx={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 9999 }} />
+			)}
+
 			{config?.leftSidePanel?.display && <LeftSideLayout1 />}
 
 			<div className="flex min-w-0 flex-auto">
