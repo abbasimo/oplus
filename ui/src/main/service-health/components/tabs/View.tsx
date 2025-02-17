@@ -483,7 +483,12 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 														onClick={() => {
 															pushTab({
 																label: item.title,
-																element: <ServiceDetails id={item.id} />
+																element: (
+																	<ServiceDetails
+																		envId={envDetails.id}
+																		serviceId={item.id}
+																	/>
+																)
 															});
 
 															window.scrollTo({ behavior: 'smooth', top: 0 });

@@ -1,4 +1,4 @@
-import React, { lazy, useEffect } from 'react';
+import React, { lazy, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { GrServices } from 'react-icons/gr';
 import { PiEye, PiMagnifyingGlass, PiNotePencil, PiPen, PiPlusBold, PiTrash } from 'react-icons/pi';
@@ -18,7 +18,7 @@ import {
 	useDeleteServiceMutation,
 	useUpdateServiceMutation
 } from '@main/service-health/api/services';
-import { IEnviroment, IUpdateServicePayload } from '@main/service-health/api/types';
+import { IEnviroment, IService, IUpdateServicePayload } from '@main/service-health/api/types';
 import { useTabsContext } from '@main/service-health/pages/ServiceHealth';
 import {
 	selectServiceHealthSettingTabState,
@@ -39,8 +39,9 @@ import { ListItemIcon } from '@mui/material';
 import { ListItemText } from '@mui/material';
 import { RHFForm, RHFNumberField, RHFTextField } from '@remate/components';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { format } from 'date-fns-jalali';
+import { format, formatDuration } from 'date-fns-jalali';
 import { motion } from 'framer-motion';
+import { MRT_ColumnDef } from 'material-react-table';
 
 const ServiceDetails = lazy(() => import('./ServiceDetails'));
 
@@ -191,18 +192,94 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 		}
 	};
 
+	const columns = useMemo<MRT_ColumnDef<IService>[]>(
+		() => [
+			{
+				header: 'عنوان',
+				accessorKey: 'title',
+				grow: true,
+				muiTableBodyCellProps: { sx: { whiteSpace: 'nowrap' } }
+			},
+			{
+				header: 'URL',
+				accessorKey: 'health_check_url',
+				Cell: ({ cell }) => {
+					return (
+						<a
+							target="_blank"
+							href={cell.getValue<string>()}
+							dir="ltr"
+							rel="noreferrer"
+						>
+							{cell.renderValue<string>()}
+						</a>
+					);
+				}
+			},
+			{
+				header: 'تاریخ ایجاد',
+				accessorKey: 'created_at',
+				enableColumnFilter: false,
+				accessorFn(originalRow) {
+					return <span dir="ltr">{format(originalRow.created_at, 'yyyy/MM/dd - HH:mm')}</span>;
+				}
+			},
+			{
+				header: 'interval',
+				accessorKey: 'interval',
+				accessorFn(originalRow) {
+					return `${originalRow.interval} ثانیه`;
+				}
+			},
+			{
+				header: 'uptime',
+				grow: true,
+				muiTableBodyCellProps: { sx: { whiteSpace: 'nowrap' } },
+				accessorFn: ({ uptime }) =>
+					uptime
+						? formatDuration(
+								{
+									days: Math.floor(uptime / (3600 * 24)),
+									hours: Math.floor(uptime / 3600 / 24),
+									minutes: Math.floor((uptime % 3600) / 60),
+									seconds: uptime % 60
+								},
+								{ delimiter: ' و ' }
+							)
+						: '-'
+			},
+			{
+				header: 'وضعیت',
+				enableColumnFilter: false,
+				maxSize: 144,
+				accessorFn(originalRow) {
+					return (
+						<Chip
+							variant="filled"
+							label={originalRow.status === 'healthy' ? 'عملیاتی' : 'مختل'}
+							color={originalRow.status === 'healthy' ? 'success' : 'error'}
+							sx={{ borderRadius: 0.5, height: 32 }}
+							className="px-24 w-112"
+						/>
+					);
+				}
+			}
+		],
+		[]
+	);
+
 	return (
 		<motion.div
 			className="overflow-hidden"
 			initial={{ height: 0 }}
 			animate={{ height: 'auto' }}
-			transition={{ duration: 0.2, ease: 'easeInOut' }}
+			transition={{ delay: 0.1, duration: 0.2, ease: 'easeInOut' }}
 		>
 			<Grid2
 				key={envId}
 				component={motion.div}
 				initial={{ opacity: 0, y: 8 }}
-				animate={{ opacity: 1, y: 0, transition: { delay: 0.3, duration: 0.35 } }}
+				animate={{ opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.35 } }}
 				container
 				size={12}
 				spacing={2}
@@ -312,66 +389,7 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 							enableTopToolbar={false}
 							enableRowActions
 							data={envDetails?.services ?? []}
-							columns={[
-								{
-									header: 'عنوان',
-									accessorKey: 'title',
-									grow: true,
-									muiTableBodyCellProps: { sx: { whiteSpace: 'nowrap' } }
-								},
-								{
-									header: 'URL',
-									accessorKey: 'health_check_url',
-									accessorFn(originalRow) {
-										return (
-											<a
-												target="_blank"
-												href={originalRow.health_check_url}
-												dir="ltr"
-												rel="noreferrer"
-											>
-												{originalRow.health_check_url}
-											</a>
-										);
-									}
-								},
-								{
-									header: 'تاریخ ایجاد',
-									accessorKey: 'created_at',
-									enableColumnFilter: false,
-									accessorFn(originalRow) {
-										return (
-											<span dir="ltr">
-												{format(originalRow.created_at, 'yyyy/MM/dd - HH:mm')}
-											</span>
-										);
-									}
-								},
-								{
-									header: 'interval',
-									accessorKey: 'interval',
-									accessorFn(originalRow) {
-										return `${originalRow.interval} ثانیه`;
-									}
-								},
-								{ header: 'uptime', accessorKey: 'uptime' },
-								{
-									header: 'وضعیت',
-									accessorKey: 'status',
-									enableColumnFilter: false,
-									accessorFn(originalRow) {
-										return (
-											<Chip
-												variant="filled"
-												label={originalRow.status === 'healthy' ? 'عملیاتی' : 'مختل'}
-												color={originalRow.status === 'healthy' ? 'success' : 'error'}
-												sx={{ borderRadius: 0.5, height: 32 }}
-												className="px-24 w-112"
-											/>
-										);
-									}
-								}
-							]}
+							columns={columns}
 							enableColumnPinning
 							state={{
 								columnPinning: { right: ['mrt-row-actions'] },
@@ -391,7 +409,12 @@ function EnvDetails({ envId }: IEnvDetailsProps) {
 											onClick={() => {
 												pushTab({
 													label: row.original.title,
-													element: <ServiceDetails id={row.original.id} />
+													element: (
+														<ServiceDetails
+															envId={envId}
+															serviceId={row.original.id}
+														/>
+													)
 												});
 
 												window.scrollTo({ behavior: 'smooth', top: 0 });

@@ -2,7 +2,6 @@ const locale = {
 	APP_TITLE: 'اُپلاس',
 	TRY_AGAIN: 'تلاش مجدد',
 	HOME_PAGE: 'صفحه اصلی',
-	LOGOUT: 'خروج از حساب کاربری',
 	LOADING: 'در حال بارگذاری',
 	FONT_SIZE: 'اندازه قلم',
 	FULLSCREEN_TOGGLE: 'تغییر حالت تمام صفحه',
