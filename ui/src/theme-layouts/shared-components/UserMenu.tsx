@@ -121,6 +121,7 @@ function UserMenu() {
 				) : (
 					<MenuItem
 						onClick={() => {
+							userMenuClose();
 							pushAlertDialog({
 								title: t`SIGN_OUT`,
 								content: t`SIGN_OUT_CONFIRM_DIALOG`,
