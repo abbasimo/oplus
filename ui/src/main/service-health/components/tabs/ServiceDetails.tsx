@@ -1,16 +1,17 @@
-import { ReactNode } from 'react';
-import ReactApexChart from 'react-apexcharts';
+import { ReactNode, useMemo } from 'react';
 import { IoDocumentTextOutline } from 'react-icons/io5';
 import { MdDeveloperMode } from 'react-icons/md';
 import { RiHistoryLine } from 'react-icons/ri';
 import DataTable from '@components/dataTable';
 import Loading from '@components/Loading';
 import { useServiceDetailsQuery, useServiceOutagesQuery } from '@main/service-health/api/services';
-import { IOutage } from '@main/service-health/api/types';
-import { Box, Grid2, useTheme } from '@mui/material';
+import { ServiceOutages } from '@main/service-health/api/types';
+import { Box, Grid2, styled, Tooltip } from '@mui/material';
 import { Divider, Paper, Stack, Typography } from '@mui/material';
-import { ApexOptions } from 'apexcharts';
+import { tooltipClasses } from '@mui/material';
+import { TooltipProps } from '@mui/material';
 import { eachDayOfInterval, format, formatDuration, isBefore, isEqual, subDays } from 'date-fns-jalali';
+import { motion } from 'framer-motion';
 
 const today = new Date();
 const ninetyDaysAgo = subDays(today, 89);
@@ -23,12 +24,20 @@ interface ServiceDetailsProps {
 }
 
 const ServiceDetails = ({ envId, serviceId }: ServiceDetailsProps) => {
-	const { data: serviceDetails, status } = useServiceDetailsQuery({
+	const { data: serviceDetails, status: serviceDetailsStatus } = useServiceDetailsQuery({
 		queryPayload: { envId, serviceId },
 		refetchInterval: 5 * 1000
 	});
 
-	if (status !== 'success') {
+	const { data: outages, status: outagesStatus } = useServiceOutagesQuery({
+		queryPayload: {
+			envId,
+			serviceId
+		},
+		refetchInterval: 5 * 1000
+	});
+
+	if (serviceDetailsStatus !== 'success' || outagesStatus !== 'success') {
 		return <Loading />;
 	}
 
@@ -45,8 +54,7 @@ const ServiceDetails = ({ envId, serviceId }: ServiceDetailsProps) => {
 				<Grid2 size={12}>
 					<HealthStatusSection
 						serviceCreateDate={serviceDetails.created_at}
-						envId={envId}
-						serviceId={serviceId}
+						outages={outages}
 					/>
 				</Grid2>
 				<Grid2
@@ -210,146 +218,22 @@ function ServiceInformationCard({ label, content }: IServiceInformationCardProps
 }
 
 interface IHealthStatusSectionProps {
-	envId: number;
-	serviceId: number;
+	outages: ServiceOutages;
 	serviceCreateDate: string;
 }
 
-function HealthStatusSection({ envId, serviceId, serviceCreateDate }: IHealthStatusSectionProps) {
-	const { data: outages, status } = useServiceOutagesQuery({
-		queryPayload: {
-			envId,
-			serviceId
-		}
-	});
+function HealthStatusSection({ outages, serviceCreateDate }: IHealthStatusSectionProps) {
+	const stabillityOfService = useMemo(() => {
+		const sumOutages = outages.reduce((sum: number, outageItem) => {
+			const sumDateOutages = outageItem.outages.reduce((sumDateOutages: number, outage) => {
+				return sumDateOutages + outage.downtime_duration;
+			}, 0);
 
-	const theme = useTheme();
+			return sum + sumDateOutages;
+		}, 0);
 
-	if (status !== 'success') {
-		return <Loading />;
-	}
-
-	const options: ApexOptions = {
-		states: {
-			hover: {
-				filter: {
-					type: 'dark'
-				}
-			},
-			active: {
-				filter: {
-					type: 'none'
-				}
-			}
-		},
-		dataLabels: {
-			enabled: false
-		},
-		chart: {
-			type: 'bar',
-			toolbar: { show: false }
-		},
-		plotOptions: {
-			bar: {
-				horizontal: false,
-				borderRadius: 2,
-				barHeight: 40,
-				columnWidth: '64%'
-			}
-		},
-		xaxis: {
-			labels: { show: false },
-			axisTicks: { show: false },
-			axisBorder: { show: false }
-		},
-		yaxis: {
-			show: false
-		},
-		grid: {
-			show: false
-		},
-		tooltip: {
-			enabled: true,
-			followCursor: true,
-			marker: {
-				show: true
-			},
-			intersect: true,
-			inverseOrder: true,
-
-			custom: function ({ seriesIndex, dataPointIndex, w }) {
-				const point = w.globals.initialSeries[seriesIndex].data[dataPointIndex];
-
-				if (!point.meta) {
-					return null;
-				}
-
-				let content;
-
-				if (point.meta.outages.length) {
-					content = `
-					<div>
-						<p class="py-12 px-8" style="background-color: ${theme.palette.grey[200]}; padding: 12px 8px; border-radius: ${theme.shape.borderRadius / 2}px;"><strong>میزان قطعی: </strong> ${formatDuration({ hours: Math.floor(point.meta.sumOutages / 3600), minutes: Math.floor((point.meta.sumOutages % 3600) / 60), seconds: point.meta.sumOutages % 60 }, { delimiter: ' و ' })}</p>
-						<div class="py-12 px-8">
-							<ul style="list-style-type: circle; list-style-position: inside;">
-							${point.meta.outages.map((outage: IOutage) => `<li style="color: ${theme.palette.error.dark}" class="mb-4">قطعی از <strong>${format(outage.start_time.replace(/Z/, ''), 'HH:mm:ss')}</strong> تا <strong>${format(outage.end_time.replace(/Z/, ''), 'HH:mm:ss')}</strong></li>`).join('\n')}
-							</ul>
-						</div>
-					</div>
-					`;
-				} else {
-					content = '<p>در این روز قطعی وجود ندارد.</p>';
-				}
-
-				return `
-				  <div dir="rtl" class="flex flex-wrap gap-12 p-16">
-                    <div class="basis-full">
-				        <strong>${point.x}</strong>
-                    </div>
-                    <div class="basis-full">
-						${content}
-                    </div>
-				  </div>`;
-			}
-		}
-	};
-
-	const series: ApexOptions['series'] = [
-		{
-			name: 'Uptime',
-			data: dateRange.map((date) => {
-				if (isBefore(date, serviceCreateDate)) {
-					return {
-						fillColor: theme.palette.grey[400],
-						x: format(date, 'd MMMM yyyy'),
-						y: 1
-					};
-				}
-
-				const dateOutages =
-					outages.find((outage) => isEqual(new Date(outage.date.replace(/Z|z/, '')), date))?.outages ?? [];
-
-				const sumOutages = dateOutages.reduce((sum: number, outage) => {
-					return sum + outage.downtime_duration;
-				}, 0);
-
-				return {
-					fillColor:
-						sumOutages === 0
-							? theme.palette.success.main
-							: sumOutages > 5 * 60
-								? theme.palette.error.main
-								: theme.palette.warning.dark,
-					x: format(date, 'd MMMM yyyy'),
-					y: 1,
-					meta: {
-						sumOutages,
-						outages: dateOutages ?? []
-					}
-				};
-			})
-		}
-	];
+		return (100 - (sumOutages / (outages?.length * 24 * 60 * 60)) * 100).toFixed(2);
+	}, [outages]);
 
 	return (
 		<Grid2
@@ -368,50 +252,225 @@ function HealthStatusSection({ envId, serviceId, serviceCreateDate }: IHealthSta
 			</Grid2>
 			<Grid2 size={12}>
 				<Paper
-					className="px-32 py-12"
+					className="px-32 py-24"
 					variant="outlined"
 				>
-					<ReactApexChart
-						options={options}
-						series={series}
-						type="bar"
-						height={100}
-					/>
-					<Box mt={-2}>
-						<Divider />
-						<Stack
-							direction="row"
-							justifyContent="space-between"
-							alignItems="center"
-							sx={{ transform: 'translateY(-50%)' }}
-						>
-							<Typography
-								variant="body2"
-								color="textSecondary"
-								sx={{ backgroundColor: 'background.paper', paddingRight: 2 }}
+					<Grid2
+						container
+						spacing={2}
+					>
+						<Grid2 size={12}>
+							<Grid2
+								container
+								className="flex-nowrap justify-between flex-row-reverse"
+								columns={90}
 							>
-								امروز
-							</Typography>
-							<Typography
-								variant="body2"
-								color="textSecondary"
-								sx={{ backgroundColor: 'background.paper', paddingX: 2 }}
+								{dateRange.map((date, index) => {
+									let bgColor;
+									let content;
+
+									if (isBefore(date, subDays(serviceCreateDate, 1))) {
+										bgColor = 'grey.400';
+										content = (
+											<Typography variant="body2">اطلاعاتی در این روز در دسترس نیست</Typography>
+										);
+									} else {
+										const dateOutages =
+											outages.find((outage) =>
+												isEqual(new Date(outage.date.replace(/Z|z/, '')), date)
+											)?.outages ?? [];
+
+										const sumOutages = dateOutages.reduce((sum: number, outage) => {
+											return sum + outage.downtime_duration;
+										}, 0);
+
+										if (sumOutages === 0) {
+											content = (
+												<Typography variant="body2">در این روز قطعی وجود ندارد</Typography>
+											);
+										} else {
+											content = (
+												<Grid2
+													container
+													spacing={1}
+												>
+													<Grid2 size={12}>
+														<Box
+															className="py-12 px-8"
+															bgcolor="grey.200"
+															borderRadius={0.5}
+														>
+															<Typography variant="body2">
+																<Typography
+																	variant="body2"
+																	className="font-600"
+																	component="span"
+																>
+																	میزان قطعی:{' '}
+																</Typography>
+																{formatDuration(
+																	{
+																		hours: Math.floor(sumOutages / 3600),
+																		minutes: Math.floor((sumOutages % 3600) / 60),
+																		seconds: sumOutages % 60
+																	},
+																	{ delimiter: ' و ' }
+																)}
+															</Typography>
+														</Box>
+													</Grid2>
+													<Grid2 size={12}>
+														<ul
+															className="list-inside p-8"
+															style={{ listStyleType: 'circle' }}
+														>
+															{dateOutages.map((outage, index) => (
+																<Typography
+																	variant="body2"
+																	component="li"
+																	color="error.dark"
+																	key={index}
+																>
+																	از{' '}
+																	<strong>
+																		{format(
+																			outage.start_time.replace(/Z/, ''),
+																			'HH:mm:ss'
+																		)}
+																	</strong>{' '}
+																	تا{' '}
+																	<strong>
+																		{format(
+																			outage.end_time.replace(/Z/, ''),
+																			'HH:mm:ss'
+																		)}
+																	</strong>
+																</Typography>
+															))}
+														</ul>
+													</Grid2>
+												</Grid2>
+											);
+										}
+
+										bgColor =
+											sumOutages === 0
+												? 'success.main'
+												: sumOutages > 5 * 60
+													? 'error.main'
+													: 'warning.dark';
+									}
+
+									return (
+										<Grid2
+											key={index}
+											size={0.6}
+											className="overflow-hidden"
+										>
+											<BarTooltip
+												arrow
+												title={
+													<Grid2
+														className="p-12"
+														container
+														spacing={1}
+													>
+														<Grid2 size={12}>
+															<Typography
+																variant="body1"
+																className="font-500"
+															>
+																{format(date, 'd MMMM yyyy')}
+															</Typography>
+														</Grid2>
+														<Grid2>{content}</Grid2>
+													</Grid2>
+												}
+											>
+												<Box
+													component={motion.div}
+													initial={{ y: 52 }}
+													animate={{
+														opacity: 1,
+														y: 0,
+														transition: { delay: (index + 1) * 0.01, duration: 0.3 }
+													}}
+													className="w-full h-52"
+													bgcolor={bgColor}
+													sx={{
+														transition: 'filter 300',
+														'&:hover': {
+															filter: 'brightness(0.75)'
+														}
+													}}
+													borderRadius={0.25}
+												/>
+											</BarTooltip>
+										</Grid2>
+									);
+								})}
+							</Grid2>
+						</Grid2>
+
+						<Grid2 size={12}>
+							<Stack
+								direction="row"
+								className="relative items-center justify-between z-0"
 							>
-								پایداری: 99.91%
-							</Typography>
-							<Typography
-								variant="body2"
-								color="textSecondary"
-								sx={{ backgroundColor: 'background.paper', paddingLeft: 2 }}
-							>
-								90 روز گذشته
-							</Typography>
-						</Stack>
-					</Box>
+								<Typography
+									variant="body2"
+									color="textSecondary"
+									sx={{ backgroundColor: 'background.paper', paddingRight: 2 }}
+								>
+									امروز
+								</Typography>
+								<Typography
+									variant="body2"
+									color="textSecondary"
+									sx={{ backgroundColor: 'background.paper', paddingX: 2 }}
+								>
+									پایداری: {stabillityOfService}%
+								</Typography>
+								<Typography
+									variant="body2"
+									color="textSecondary"
+									sx={{ backgroundColor: 'background.paper', paddingLeft: 2 }}
+								>
+									90 روز گذشته
+								</Typography>
+								<Divider
+									className="absolute top-1/2 left-0 right-0 -z-1"
+									sx={{ transform: 'translateY(-50%)' }}
+								/>
+							</Stack>
+						</Grid2>
+					</Grid2>
 				</Paper>
 			</Grid2>
 		</Grid2>
 	);
 }
+
+const BarTooltip = styled(({ className, ...props }: TooltipProps) => (
+	<Tooltip
+		{...props}
+		classes={{ popper: className }}
+	/>
+))(({ theme }) => ({
+	[`& .${tooltipClasses.arrow}`]: {
+		color: theme.palette.background.paper,
+		'&::before': {
+			...theme.mixins.border(1)
+		}
+	},
+	[`& .${tooltipClasses.tooltip}`]: {
+		backgroundColor: theme.palette.background.paper,
+		color: theme.palette.text.primary,
+		minWidth: 244,
+		maxWidth: 360,
+		fontSize: theme.typography.pxToRem(12),
+		...theme.mixins.border(1)
+	}
+}));
 
 export default ServiceDetails;
