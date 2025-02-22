@@ -18,7 +18,7 @@
     "@popperjs/core": "2.11.8",
     "@reduxjs/toolkit": "^2.5.0",
     "@remate/components": "^0.0.3",
-    "@remate/core": "^0.0.7",
+    "@remate/core": "^0.0.8",
     "@tanstack/react-query": "^5.62.15",
     "apexcharts": "^4.4.0",
     "autosuggest-highlight": "3.3.4",
@@ -118,7 +118,7 @@
     "build:production": "tsc && vite build --mode production",
     "build": "node ./node-scripts/build-help.js",
     "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview --port 8000",
+    "preview": "vite preview --port 8686",
     "audit": "npm audit --production"
   },
   "engines": {

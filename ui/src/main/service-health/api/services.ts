@@ -31,9 +31,24 @@ export const {
 			return baseQueryReturnValue.outage;
 		}
 	}),
-	createService: build.mutation<void, ICreateServicePayload>({
+	createService: build.mutation<IService, ICreateServicePayload>({
 		query: ({ envId, values }) => ({ url: `/envs/${envId}/services`, data: values, method: 'POST' }),
-		invalidates: (_, { envId }) => [['envs', envId]]
+		invalidates: (_, { envId }) => [['envs', envId]],
+		transformResponse(baseQueryReturnValue: { service: IService }) {
+			return baseQueryReturnValue.service;
+		},
+		optimisticUpdate: [
+			{
+				mode: 'onSuccess',
+				queryKey: ({ envId }) => ['envs', envId],
+				generateUpdatedData(data, previusData: IEnviromentDetails) {
+					return {
+						...previusData,
+						services: [...(previusData.services ?? []), { ...data, created_at: new Date().toISOString() }]
+					};
+				}
+			}
+		]
 	}),
 	updateService: build.mutation<void, IUpdateServicePayload>({
 		query: ({ envId, serviceId, values }) => ({
