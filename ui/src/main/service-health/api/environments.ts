@@ -24,7 +24,19 @@ export const { useAllEnvsQuery, useEnvDetailsQuery, useCreateEnvMutation, useUpd
 				method: 'POST',
 				data: { title, description }
 			}),
-			invalidates: [['envs']]
+			invalidates: [['envs']],
+			transformResponse(baseQueryReturnValue: { environment: IEnviroment }) {
+				return baseQueryReturnValue.environment;
+			},
+			optimisticUpdate: [
+				{
+					queryKey: ['envs'],
+					mode: 'onSuccess',
+					generateUpdatedData(data, previusData: IEnviroment[]) {
+						return [...previusData, data];
+					}
+				}
+			]
 		}),
 		updateEnv: build.mutation<void, IUpdateEnvPayload>({
 			query: ({ envId, values }) => ({
