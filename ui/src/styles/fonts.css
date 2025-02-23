@@ -1,0 +1,49 @@
+@font-face {
+	font-family: Vazirmatn;
+	font-weight: 400;
+	src: url(/assets/fonts/vazirmatn/Vazirmatn-Regular.woff2) format('woff2');
+}
+
+@font-face {
+	font-family: Vazirmatn;
+	font-weight: 500;
+	src: url(/assets/fonts/vazirmatn/Vazirmatn-Medium.woff2) format('woff2');
+}
+
+@font-face {
+	font-family: Vazirmatn;
+	font-weight: 700;
+	src: url(/assets/fonts/vazirmatn/Vazirmatn-ExtraBold.woff2) format('woff2');
+}
+
+@font-face {
+	font-family: Poppins;
+	font-weight: 400;
+	src:
+		url(/assets/fonts/Poppins/Poppins-Regular.woff2) format('woff2'),
+		url(/assets/fonts/Poppins/Poppins-Regular.woff) format('woff');
+}
+
+@font-face {
+	font-family: Poppins;
+	font-weight: 700;
+	src:
+		url(/assets/fonts/Poppins/Poppins-Medium.woff2) format('woff2'),
+		url(/assets/fonts/Poppins/Poppins-Medium.woff) format('woff');
+}
+
+@font-face {
+	font-family: Poppins;
+	font-weight: 800;
+	src:
+		url(/assets/fonts/Poppins/Poppins-Bold.woff2) format('woff2'),
+		url(/assets/fonts/Poppins/Poppins-Bold.woff) format('woff');
+}
+
+@font-face {
+	font-family: Poppins;
+	font-weight: 900;
+	src:
+		url(/assets/fonts/Poppins/Poppins-ExtraBold.woff2) format('woff2'),
+		url(/assets/fonts/Poppins/Poppins-ExtraBold.woff) format('woff');
+}

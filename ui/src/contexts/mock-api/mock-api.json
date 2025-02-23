@@ -1,0 +1,305 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Remate Mock API",
+    "version": "1.0.0",
+    "contact": {
+      "url": "http://rematetheme.com/",
+      "email": "themes@withinpixels.com",
+      "name": "Remate Theme"
+    },
+    "description": "Remate Theme Family Mock API Open API Definitions",
+    "license": {
+      "name": "private",
+      "url": "https://themeforest.net/licenses/terms/regular"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api"
+    }
+  ],
+  "paths": {
+    "/auth/user": {
+      "parameters": [],
+      "put": {
+        "summary": "Update user",
+        "x-stoplight": {
+          "id": "73d7f4c16f9e1"
+        },
+        "operationId": "updateAuthUser",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "description": "Update user data.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/auth_user"
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "uid": "string",
+                    "password": "string",
+                    "role": "string",
+                    "data": {
+                      "displayName": "string",
+                      "photoURL": "string",
+                      "email": "string",
+                      "settings": {
+                        "layout": {},
+                        "theme": {}
+                      },
+                      "shortcuts": [
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth_user"
+        ]
+      }
+    },
+    "/auth/sign-in": {
+      "post": {
+        "summary": "Sign in",
+        "x-stoplight": {
+          "id": "2364e0950cfbd"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/auth_user"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "uid": "string",
+                      "password": "string",
+                      "role": "string",
+                      "data": {
+                        "displayName": "string",
+                        "photoURL": "string",
+                        "email": "string",
+                        "settings": {
+                          "layout": {},
+                          "theme": {}
+                        },
+                        "shortcuts": [
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "signInAuthUser",
+        "description": "User sign in.",
+        "tags": [
+          "auth_user"
+        ]
+      },
+      "parameters": []
+    },
+    "/auth/sign-up": {
+      "post": {
+        "summary": "Sign up",
+        "x-stoplight": {
+          "id": "1304e09a14509"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/auth_user"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "uid": "string",
+                      "password": "string",
+                      "role": "string",
+                      "data": {
+                        "displayName": "string",
+                        "photoURL": "string",
+                        "email": "string",
+                        "settings": {
+                          "layout": {},
+                          "theme": {}
+                        },
+                        "shortcuts": [
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "signUpAuthUser",
+        "description": "User sign up.",
+        "tags": [
+          "auth_user"
+        ]
+      },
+      "parameters": []
+    },
+    "/auth/sign-in/token": {
+      "post": {
+        "summary": "Sign in with access token",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/auth_user"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "uid": "string",
+                      "password": "string",
+                      "role": "string",
+                      "data": {
+                        "displayName": "string",
+                        "photoURL": "string",
+                        "email": "string",
+                        "settings": {
+                          "layout": {},
+                          "theme": {}
+                        },
+                        "shortcuts": [
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "signInAuthWithToken",
+        "description": "User sign in with access token.",
+        "tags": [
+          "auth_user"
+        ],
+        "x-stoplight": {
+          "id": "l0c1z42buxfgf"
+        }
+      },
+      "parameters": []
+    }
+  },
+  "securitySchemes": {},
+  "examples": {
+    "auth_users": {
+      "value": [
+        {
+          "uid": "XgbuVEXBU5gtSKdbQRP1Zbbby1i1",
+          "password": "admin",
+          "role": "admin",
+          "data": {
+            "displayName": "محمد حسین جنیدی",
+            "photoURL": "https://avatars.githubusercontent.com/u/72416731?v=4",
+            "email": "admin@gmail.com",
+            "settings": {
+              "layout": {},
+              "theme": {}
+            },
+            "shortcuts": []
+          }
+        },
+        {
+          "uid": "XgbuVEXBU5gtSKdbQRP1Zbbby1i2",
+          "password": "staff",
+          "role": "staff",
+          "data": {
+            "displayName": "Hossein Joneydi",
+            "photoURL": "https://avatars.githubusercontent.com/u/72416731?v=4",
+            "email": "staff@gmail.com",
+            "settings": {
+              "layout": {},
+              "theme": {}
+            },
+            "shortcuts": []
+          }
+        },
+        {
+          "uid": "XgbuVEXBU5gtSKdbQRP1Zbbby2i3",
+          "password": "user",
+          "role": "user",
+          "data": {
+            "displayName": "Hossein Joneydi",
+            "photoURL": "https://avatars.githubusercontent.com/u/72416731?v=4",
+            "email": "user@gmail.com",
+            "settings": {
+              "layout": {},
+              "theme": {}
+            },
+            "shortcuts": []
+          }
+        },
+        {
+          "uid": "XgbuVEXBU6gtSKdbTYR1Zbbby1i3",
+          "password": "staff",
+          "role": "staff",
+          "data": {
+            "displayName": "Arnold Matlock",
+            "photoURL": "assets/images/avatars/Arnold.jpg",
+            "email": "staff@rematetheme.com",
+            "settings": {
+              "layout": {
+                "style": "layout2",
+                "config": {
+                  "mode": "boxed",
+                  "scroll": "content",
+                  "navbar": {
+                    "display": true
+                  },
+                  "toolbar": {
+                    "display": true,
+                    "position": "below"
+                  },
+                  "footer": {
+                    "display": true,
+                    "style": "fixed"
+                  }
+                }
+              },
+              "customScrollbars": true,
+              "theme": {}
+            },
+            "shortcuts": [
+              "apps.calendar",
+              "apps.mailbox",
+              "apps.contacts",
+              "apps.tasks"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "responses": {}
+}
