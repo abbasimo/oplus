@@ -1,38 +1,38 @@
 import { apiService } from '@api/apiService';
 
-import { ICreateEnvPayload, IEnviroment, IEnviromentDetails, IUpdateEnvPayload } from './types';
+import { ICreateEnvPayload, IEnvironment, IEnvironmentDetails, IUpdateEnvPayload } from './types';
 
 export const { useAllEnvsQuery, useEnvDetailsQuery, useCreateEnvMutation, useUpdateEnvMutation, useDeleteEnvMutation } =
 	apiService.buildEndpoints((build) => ({
-		allEnvs: build.query<IEnviroment[]>({
+		allEnvs: build.query<IEnvironment[]>({
 			queryKey: ['envs'],
 			query: '/envs',
-			transformResponse(baseQueryReturnValue: { environments: IEnviroment[] }) {
+			transformResponse(baseQueryReturnValue: { environments: IEnvironment[] }) {
 				return baseQueryReturnValue.environments;
 			}
 		}),
-		envDetails: build.query<IEnviromentDetails, number>({
+		envDetails: build.query<IEnvironmentDetails, number>({
 			queryKey: (envId) => ['envs', envId],
 			query: (envId) => `/envs/${envId}`,
-			transformResponse(baseQueryReturnValue: { environment: IEnviromentDetails }) {
+			transformResponse(baseQueryReturnValue: { environment: IEnvironmentDetails }) {
 				return baseQueryReturnValue.environment;
 			}
 		}),
-		createEnv: build.mutation<IEnviroment, ICreateEnvPayload>({
+		createEnv: build.mutation<IEnvironment, ICreateEnvPayload>({
 			query: ({ title, description }) => ({
 				url: '/envs',
 				method: 'POST',
 				data: { title, description }
 			}),
 			invalidates: [['envs']],
-			transformResponse(baseQueryReturnValue: { environment: IEnviroment }) {
+			transformResponse(baseQueryReturnValue: { environment: IEnvironment }) {
 				return baseQueryReturnValue.environment;
 			},
 			optimisticUpdate: [
 				{
 					queryKey: ['envs'],
 					mode: 'onSuccess',
-					generateUpdatedData(data, previusData: IEnviroment[]) {
+					generateUpdatedData(data, previusData: IEnvironment[]) {
 						return [...previusData, data];
 					}
 				}
@@ -48,13 +48,13 @@ export const { useAllEnvsQuery, useEnvDetailsQuery, useCreateEnvMutation, useUpd
 			optimisticUpdate: [
 				{
 					queryKey: ['envs'],
-					generateUpdatedData({ envId, values }, previusData: IEnviroment[]) {
+					generateUpdatedData({ envId, values }, previusData: IEnvironment[]) {
 						return previusData.map((env) => (env.id === envId ? { ...env, ...values } : env));
 					}
 				},
 				{
 					queryKey: ({ envId }) => ['envs', envId],
-					generateUpdatedData: ({ values }, previusData: IEnviromentDetails) => ({
+					generateUpdatedData: ({ values }, previusData: IEnvironmentDetails) => ({
 						...previusData,
 						...values
 					})
@@ -67,7 +67,7 @@ export const { useAllEnvsQuery, useEnvDetailsQuery, useCreateEnvMutation, useUpd
 			optimisticUpdate: [
 				{
 					queryKey: ['envs'],
-					generateUpdatedData(envId, previusData: IEnviroment[]) {
+					generateUpdatedData(envId, previusData: IEnvironment[]) {
 						return previusData.filter((env) => env.id !== envId);
 					}
 				}

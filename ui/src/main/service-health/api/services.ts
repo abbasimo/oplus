@@ -3,7 +3,7 @@ import { apiService } from '@api/apiService';
 import {
 	ICreateServicePayload,
 	IDeleteServicePayload,
-	IEnviromentDetails,
+	IEnvironmentDetails,
 	IService,
 	IServiceDetailsPayload,
 	IUpdateServicePayload,
@@ -41,7 +41,7 @@ export const {
 			{
 				mode: 'onSuccess',
 				queryKey: ({ envId }) => ['envs', envId],
-				generateUpdatedData(data, previusData: IEnviromentDetails) {
+				generateUpdatedData(data, previusData: IEnvironmentDetails) {
 					return {
 						...previusData,
 						services: [...(previusData.services ?? []), { ...data, created_at: new Date().toISOString() }]
@@ -63,7 +63,7 @@ export const {
 		optimisticUpdate: [
 			{
 				queryKey: ({ envId }) => ['envs', envId],
-				generateUpdatedData({ serviceId, values }, previusData: IEnviromentDetails) {
+				generateUpdatedData({ serviceId, values }, previusData: IEnvironmentDetails) {
 					const services = previusData.services.map((service) =>
 						service.id === serviceId ? { ...service, ...values } : service
 					);
@@ -91,7 +91,7 @@ export const {
 		optimisticUpdate: [
 			{
 				queryKey: ({ envId }) => ['envs', envId],
-				generateUpdatedData({ serviceId }, previusData: IEnviromentDetails) {
+				generateUpdatedData({ serviceId }, previusData: IEnvironmentDetails) {
 					const services = previusData.services.filter((service) => service.id !== serviceId);
 
 					return { ...previusData, services };
