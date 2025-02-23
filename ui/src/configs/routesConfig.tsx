@@ -1,10 +1,8 @@
 import { Navigate } from 'react-router';
 import { authPrivileges } from '@auth';
 import Error404Page from '@main/404/Error404Page';
-import ExampleConfig from '@main/example/ExampleConfig';
 import ServiceHealthConfig from '@main/service-health/ServiceHealthConfig';
 import SignInConfig from '@main/sign-in/SignInConfig';
-import SignUpConfig from '@main/sign-up/SignUpConfig';
 import { RemateRoutesType } from '@remate/core';
 
 /**
@@ -27,7 +25,7 @@ const routes: RemateRoutesType = [
 	 */
 	{
 		path: '/',
-		element: <Navigate to="/example" />,
+		element: <Navigate to="/service-health" />,
 		auth: authPrivileges.user
 	},
 
@@ -53,10 +51,9 @@ const routes: RemateRoutesType = [
 		},
 		isNavigable: false,
 		auth: authPrivileges.onlyGuest,
-		children: [...SignInConfig, ...SignUpConfig]
+		children: [...SignInConfig]
 	},
 
-	...ExampleConfig,
 	...ServiceHealthConfig,
 
 	{

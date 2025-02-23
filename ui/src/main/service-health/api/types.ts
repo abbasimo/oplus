@@ -1,4 +1,4 @@
-export interface IEnviroment {
+export interface IEnvironment {
 	id: number;
 	title: string;
 	description: string;
@@ -31,7 +31,7 @@ export interface IServiceOutage {
 
 export type ServiceOutages = IServiceOutage[];
 
-export interface IEnviromentDetails extends IEnviroment {
+export interface IEnvironmentDetails extends IEnvironment {
 	services: IService[];
 }
 

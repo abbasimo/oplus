@@ -1,32 +1,13 @@
-import React from 'react';
-import { Link } from 'react-router';
 import InternalSignInForm from '@auth/services/internal/components/InternalSignInForm';
-import oidcAuthService from '@auth/services/oidc/oidcAuthService';
-import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { useNotification } from '@remate/core';
 
 /**
  * The sign in page.
  */
 function SignInPage() {
-	const [signInLoading, setSignInLoading] = React.useState(false);
-	const { open } = useNotification();
-
-	async function handleSignInWithSSO() {
-		try {
-			setSignInLoading(true);
-			await oidcAuthService.signInRedirect();
-		} catch (error: any) {
-			open?.({ type: 'error', message: error.message });
-		} finally {
-			setSignInLoading(false);
-		}
-	}
-
 	return (
 		<div className="flex min-w-0 flex-1 flex-col items-center sm:flex-row sm:justify-center md:items-start md:justify-start">
 			<Paper className="h-full w-full px-16 py-8 sm:h-auto sm:w-auto sm:rounded-2xl sm:p-48 sm:shadow md:flex md:h-full md:w-1/2 md:items-center md:justify-end md:rounded-none md:p-64 md:shadow-none">
@@ -37,43 +18,10 @@ function SignInPage() {
 						alt="logo"
 					/>
 
-					<Typography className="mt-32 text-4xl font-extrabold leading-tight tracking-tight">
-						Sign in
-					</Typography>
-					<div className="mt-2 flex items-baseline font-medium">
-						<Typography>Don&apos;t have an account?</Typography>
-						<Link
-							className="ml-4"
-							to="/sign-up"
-						>
-							Sign up
-						</Link>
-					</div>
+					<Typography className="mt-32 text-4xl font-extrabold leading-tight tracking-tight">ورود</Typography>
 
 					<div className="w-full">
 						<InternalSignInForm />
-
-						<div className="mt-32 flex items-center">
-							<div className="mt-px flex-auto border-t" />
-							<Typography
-								className="mx-8"
-								color="text.secondary"
-							>
-								Or continue with
-							</Typography>
-							<div className="mt-px flex-auto border-t" />
-						</div>
-
-						<div className="mt-32 flex items-center space-x-16">
-							<LoadingButton
-								loading={signInLoading}
-								variant="outlined"
-								className="flex-auto"
-								onClick={() => handleSignInWithSSO()}
-							>
-								Sign in with SSO
-							</LoadingButton>
-						</div>
 					</div>
 				</CardContent>
 			</Paper>
@@ -146,12 +94,11 @@ function SignInPage() {
 
 				<div className="relative z-10 w-full max-w-2xl">
 					<div className="text-6xl font-bold leading-none text-gray-100">
-						<div>Welcome to</div>
-						<div className="text-7xl font-800 mt-8">Oplus</div>
+						<div>به سامانه اُپلاس خوش آمدید</div>
 					</div>
 					<div className="mt-24 text-lg leading-6 tracking-tight text-gray-400">
-						Remate helps developers to build organized and well coded dashboards full of beautiful and rich
-						modules. start building your application today.
+						سامانه اُپلاس امکاناتی متعدد با تجربه کاربری روان برای شما فراهم آورده است که میتوانید از آنها
+						استفاده کنید.
 					</div>
 				</div>
 			</Box>

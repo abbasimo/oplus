@@ -81,7 +81,7 @@ function InternalSignInForm() {
 					<TextField
 						{...field}
 						className="mb-24"
-						label="Email"
+						label="ایمیل"
 						autoFocus
 						type="email"
 						error={!!errors.email}
@@ -100,7 +100,7 @@ function InternalSignInForm() {
 					<TextField
 						{...field}
 						className="mb-24"
-						label="Password"
+						label="گذرواژه"
 						type="password"
 						error={!!errors.password}
 						helperText={errors?.password?.message}
@@ -118,7 +118,7 @@ function InternalSignInForm() {
 					render={({ field }) => (
 						<FormControl>
 							<FormControlLabel
-								label="Remember me"
+								label="مرا به خاطر بسپار"
 								control={
 									<Checkbox
 										size="small"
@@ -141,7 +141,7 @@ function InternalSignInForm() {
 				type="submit"
 				size="large"
 			>
-				Sign in
+				ورود به حساب کاربری
 			</LoadingButton>
 		</form>
 	);
