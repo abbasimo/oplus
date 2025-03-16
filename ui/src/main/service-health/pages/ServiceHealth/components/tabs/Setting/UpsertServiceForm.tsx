@@ -26,7 +26,13 @@ function UpsertServiceForm({ submitButtonText, submitting }: IUpsertServiceFormP
 					name="health_check_url"
 					label="URL"
 					placeholder="مثال: https://google.com"
-					slotProps={{ input: { dir: 'ltr' } }}
+					slotProps={{
+						input: {
+							inputProps: {
+								dir: 'ltr'
+							}
+						}
+					}}
 					rules={{
 						required: true,
 						pattern: {

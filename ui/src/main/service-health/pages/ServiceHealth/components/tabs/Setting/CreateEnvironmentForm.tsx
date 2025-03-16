@@ -16,7 +16,8 @@ export default function CreateEnvironmentForm() {
 		defaultValues: {
 			title: '',
 			description: null
-		}
+		},
+		mode: 'onChange'
 	});
 
 	return (

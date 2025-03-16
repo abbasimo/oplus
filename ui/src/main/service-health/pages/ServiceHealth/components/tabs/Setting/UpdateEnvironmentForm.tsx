@@ -20,7 +20,8 @@ export default function UpdateEnvironmentForm({ environment }: IUpdateEnvironmen
 		defaultValues: {
 			title: environment.title,
 			description: environment.description
-		}
+		},
+		mode: 'onChange'
 	});
 
 	return (

@@ -23,7 +23,8 @@ export default function UpdateServiceForm({ envId, service }: IUpdateServiceForm
 			description: service.description,
 			health_check_url: service.health_check_url,
 			interval: service.interval
-		}
+		},
+		mode: 'onChange'
 	});
 
 	return (

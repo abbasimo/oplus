@@ -13,7 +13,7 @@ import {
 import { Box, Button, Chip, Grid2, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { format, formatDuration } from 'date-fns-jalali';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { MRT_ColumnDef } from 'material-react-table';
 
 import FilterStatusField from '../../FilterStatusField';
@@ -131,177 +131,179 @@ function EnvDetailsSection({ envId }: IEnvDetailsSectionProps) {
 	);
 
 	return (
-		<motion.div
-			className="overflow-hidden"
-			initial={{ height: 0 }}
-			animate={{ height: 'auto' }}
-			transition={{ delay: 0.1, duration: 0.2, ease: 'easeInOut' }}
-		>
-			<Grid2
-				key={envId}
-				component={motion.div}
-				initial={{ opacity: 0, y: 8 }}
-				animate={{ opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.35 } }}
-				container
-				spacing={2}
+		<AnimatePresence>
+			<motion.div
+				className="overflow-hidden"
+				initial={{ height: 0 }}
+				animate={{ height: 'auto' }}
+				transition={{ delay: 0.1, duration: 0.2, ease: 'easeInOut' }}
 			>
 				<Grid2
+					key={envId}
+					component={motion.div}
+					initial={{ opacity: 0, y: 8 }}
+					animate={{ opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.35 } }}
 					container
-					size={12}
 					spacing={2}
-					justifyContent="space-between"
-					alignItems="center"
 				>
-					<Grid2>
-						<Stack
-							direction="row"
-							spacing={1}
-							alignItems="center"
-						>
-							<GrServices fontSize={24} />
-							<Typography variant="title3">
-								سرویس های محیط{' '}
-								<Box
-									component="span"
-									color="primary.main"
-								>
-									{envDetails?.title ?? envs?.find((env) => env.id === envId)?.title}
-								</Box>
-							</Typography>
-						</Stack>
+					<Grid2
+						container
+						size={12}
+						spacing={2}
+						justifyContent="space-between"
+						alignItems="center"
+					>
+						<Grid2>
+							<Stack
+								direction="row"
+								spacing={1}
+								alignItems="center"
+							>
+								<GrServices fontSize={24} />
+								<Typography variant="title3">
+									سرویس های محیط{' '}
+									<Box
+										component="span"
+										color="primary.main"
+									>
+										{envDetails?.title ?? envs?.find((env) => env.id === envId)?.title}
+									</Box>
+								</Typography>
+							</Stack>
+						</Grid2>
+						<Grid2>
+							<Button
+								variant="outlined"
+								startIcon={<PiPlusBold />}
+								size="large"
+								onClick={() => {
+									pushModal(<CreateServiceForm envId={envId} />, {
+										modalId: 'create-service',
+										maxWidth: 'sm',
+										title: 'ایجاد سرویس جدید'
+									});
+								}}
+							>
+								سرویس جدید
+							</Button>
+						</Grid2>
 					</Grid2>
-					<Grid2>
-						<Button
-							variant="outlined"
-							startIcon={<PiPlusBold />}
-							size="large"
-							onClick={() => {
-								pushModal(<CreateServiceForm envId={envId} />, {
-									modalId: 'create-service',
-									maxWidth: 'sm',
-									title: 'ایجاد سرویس جدید'
-								});
-							}}
-						>
-							سرویس جدید
-						</Button>
-					</Grid2>
-				</Grid2>
 
-				<Grid2
-					container
-					size={12}
-					spacing={1.5}
-				>
-					<Grid2 size={12}>
-						<SearchField
-							value={searchValue}
-							onChange={(value) => {
-								dispatch(
-									setServiceHealthState({
-										settingTab: {
-											searchValue: value
-										}
-									})
-								);
-							}}
-						/>
-					</Grid2>
-					<Grid2 size={12}>
-						<FilterStatusField
-							value={selectedStatus}
-							onChange={handleChangeStatus}
-						/>
-					</Grid2>
-					<Grid2 size={12}>
-						<DataTable
-							enableTopToolbar={false}
-							enableRowActions
-							data={envDetails?.services ?? []}
-							columns={columns}
-							enableColumnPinning
-							state={{
-								columnPinning: { right: ['mrt-row-actions'] },
-								isLoading: envDetailsStatus !== 'success',
-								globalFilter: searchValue
-							}}
-							renderRowActions={({ row }) => (
-								<Grid2
-									container
-									className="flex-nowrap"
-									spacing={0.5}
-								>
-									<Grid2>
-										<Button
-											size="small"
-											startIcon={<PiEye />}
-											onClick={() => {
-												pushTab({
-													label: row.original.title,
-													element: (
-														<ServiceDetails
+					<Grid2
+						container
+						size={12}
+						spacing={1.5}
+					>
+						<Grid2 size={12}>
+							<SearchField
+								value={searchValue}
+								onChange={(value) => {
+									dispatch(
+										setServiceHealthState({
+											settingTab: {
+												searchValue: value
+											}
+										})
+									);
+								}}
+							/>
+						</Grid2>
+						<Grid2 size={12}>
+							<FilterStatusField
+								value={selectedStatus}
+								onChange={handleChangeStatus}
+							/>
+						</Grid2>
+						<Grid2 size={12}>
+							<DataTable
+								enableTopToolbar={false}
+								enableRowActions
+								data={envDetails?.services ?? []}
+								columns={columns}
+								enableColumnPinning
+								state={{
+									columnPinning: { right: ['mrt-row-actions'] },
+									isLoading: envDetailsStatus !== 'success',
+									globalFilter: searchValue
+								}}
+								renderRowActions={({ row }) => (
+									<Grid2
+										container
+										className="flex-nowrap"
+										spacing={0.5}
+									>
+										<Grid2>
+											<Button
+												size="small"
+												startIcon={<PiEye />}
+												onClick={() => {
+													pushTab({
+														label: row.original.title,
+														element: (
+															<ServiceDetails
+																envId={envId}
+																serviceId={row.original.id}
+															/>
+														)
+													});
+
+													window.scrollTo({ behavior: 'smooth', top: 0 });
+												}}
+											>
+												جزئیات
+											</Button>
+										</Grid2>
+										<Grid2>
+											<Button
+												size="small"
+												startIcon={<PiPen />}
+												onClick={() => {
+													pushModal(
+														<UpdateServiceForm
 															envId={envId}
-															serviceId={row.original.id}
-														/>
-													)
-												});
-
-												window.scrollTo({ behavior: 'smooth', top: 0 });
-											}}
-										>
-											جزئیات
-										</Button>
+															service={row.original}
+														/>,
+														{
+															modalId: 'update-service',
+															maxWidth: 'sm',
+															title: 'ویرایش سرویس'
+														}
+													);
+												}}
+											>
+												ویرایش
+											</Button>
+										</Grid2>
+										<Grid2>
+											<Button
+												size="small"
+												startIcon={<PiTrash />}
+												color="error"
+												onClick={() => {
+													pushAlertDialog({
+														alertDialogId: 'delete-service',
+														title: 'حذف سرویس',
+														content:
+															'با حذف سرویس رخداد ها و اطلاعات مربوط به سرویس حذف خواهند شد و قابل بازیابی نخواهند بود؛ آیا از حذف سرویس اطمینان دارید؟',
+														onConfirmOk() {
+															deleteServiceMutate({ envId, serviceId: row.original.id });
+														},
+														confirmOkButtonProps: { color: 'error' },
+														confirmOkText: 'حذف سرویس'
+													});
+												}}
+											>
+												حذف
+											</Button>
+										</Grid2>
 									</Grid2>
-									<Grid2>
-										<Button
-											size="small"
-											startIcon={<PiPen />}
-											onClick={() => {
-												pushModal(
-													<UpdateServiceForm
-														envId={envId}
-														service={row.original}
-													/>,
-													{
-														modalId: 'update-service',
-														maxWidth: 'sm',
-														title: 'ویرایش سرویس'
-													}
-												);
-											}}
-										>
-											ویرایش
-										</Button>
-									</Grid2>
-									<Grid2>
-										<Button
-											size="small"
-											startIcon={<PiTrash />}
-											color="error"
-											onClick={() => {
-												pushAlertDialog({
-													alertDialogId: 'delete-service',
-													title: 'حذف سرویس',
-													content:
-														'با حذف سرویس رخداد ها و اطلاعات مربوط به سرویس حذف خواهند شد و قابل بازیابی نخواهند بود؛ آیا از حذف سرویس اطمینان دارید؟',
-													onConfirmOk() {
-														deleteServiceMutate({ envId, serviceId: row.original.id });
-													},
-													confirmOkButtonProps: { color: 'error' },
-													confirmOkText: 'حذف سرویس'
-												});
-											}}
-										>
-											حذف
-										</Button>
-									</Grid2>
-								</Grid2>
-							)}
-						/>
+								)}
+							/>
+						</Grid2>
 					</Grid2>
 				</Grid2>
-			</Grid2>
-		</motion.div>
+			</motion.div>
+		</AnimatePresence>
 	);
 }
 

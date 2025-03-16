@@ -3,7 +3,7 @@ import { pop } from 'react-material-overlay';
 import { useCreateServiceMutation } from '@main/service-health/api/services';
 import { RHFForm } from '@remate/components';
 
-import UpsertEnvironmentForm from './UpsertEnvironmentForm';
+import UpsertServiceForm from './UpsertServiceForm';
 
 interface ICreateServiceFormProps {
 	envId: number;
@@ -21,7 +21,8 @@ export default function CreateServiceForm({ envId }: ICreateServiceFormProps) {
 			description: null,
 			health_check_url: '',
 			interval: 5
-		}
+		},
+		mode: 'onChange'
 	});
 
 	return (
@@ -31,7 +32,7 @@ export default function CreateServiceForm({ envId }: ICreateServiceFormProps) {
 				mutate({ envId, values });
 			})}
 		>
-			<UpsertEnvironmentForm
+			<UpsertServiceForm
 				submitting={isPending}
 				submitButtonText="ایجاد سرویس"
 			/>
