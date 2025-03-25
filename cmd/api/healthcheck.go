@@ -50,18 +50,20 @@ func (app *application) pingService(svcUrl string) (bool, error) {
 		Timeout: time.Second * 2, // todo: is it better to give from config?! idk!
 	}
 
-	req, err := http.NewRequest(http.MethodGet, svcUrl, nil)
-	if err != nil {
-		return false, ErrRequestFailed
-	}
+	maxRetries := app.config.hcMaxRetry
+	for i := 0; i < maxRetries; i++ {
+		req, err := http.NewRequest(http.MethodGet, svcUrl, nil)
+		if err != nil {
+			return false, ErrRequestFailed
+		}
 
-	resp, err := client.Do(req)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return false, ErrServiceUnreachable
+		resp, err := client.Do(req)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			defer resp.Body.Close()
+			return true, nil
+		}
 	}
-	defer resp.Body.Close()
-
-	return true, nil
+	return false, ErrServiceUnreachable
 }
 
 func (app *application) updateHealthCheck(svcID int64, status string) (string, error) {

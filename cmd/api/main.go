@@ -23,6 +23,7 @@ type config struct {
 		maxIdleConns int
 		maxIdleTime  string
 	}
+	hcMaxRetry int
 }
 
 type application struct {
@@ -43,6 +44,7 @@ func main() {
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgresSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgresSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgresSQL max connection idle time")
+	flag.IntVar(&cfg.hcMaxRetry, "hc-max-retry", 5, "Health Check Max Retry")
 
 	logger := zerolog.New(os.Stdout).With().
 		Timestamp().
