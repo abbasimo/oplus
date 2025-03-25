@@ -10,6 +10,7 @@ import (
 const (
 	ServiceStateChanged = "ServiceStateChanged"
 	EventReceived       = "EventReceived"
+	SMSSent             = "SMSSent"
 )
 
 func (app *application) initializeEventsSubscriberAndHandler() {
@@ -68,6 +69,7 @@ func (app *application) eventReceivedHandler(eventChan <-chan event.Event) {
 			app.logger.Error().Msg("invalid event data for eventReceivedHandler")
 			continue
 		}
+		//	app.logger.Info().Msg(fmt.Sprintf("received event for service id %d with severity %s and  ", e.ServiceID, e.))
 		fmt.Println(e)
 		// fetch all rules from database
 		// do as rule
